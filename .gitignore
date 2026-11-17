@@ -1,0 +1,44 @@
+# Secretos y configuración local
+.env
+.env.*
+*.key
+*.pem
+*.p12
+credentials*.json
+client_secret*.json
+token*.json
+service-account*.json
+.n8n/
+config.local.*
+*.local
+
+# Exports originales y copias de respaldo
+*_original.json
+originales/
+privado/
+respaldo*/
+backup*/
+*.bak
+*.orig
+
+# Archivos temporales y descargas intermedias
+*.tmp
+*.crdownload
+*.part
+~$*
+.~lock.*
+tmp/
+temp/
+
+# Logs y datos de ejecución
+*.log
+logs/
+executions/
+ejecuciones/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

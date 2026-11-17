@@ -1,0 +1,568 @@
+{
+  "name": "WF-01 Ingesta documental RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "n8nUserAuth",
+        "formTitle": "Ingesta documental RAG",
+        "formDescription": "Cargá uno o más procedimientos en formato Markdown. Solo se aceptan procedimientos que todavía no estén cargados; los ya existentes se rechazan sin modificarlos.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Procedimientos",
+              "fieldType": "file",
+              "fieldName": "procedimientos",
+              "acceptFileTypes": ".md",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Cargar",
+          "path": "ingesta-documental-rag",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Carga procesada. Revisá el resultado en la ejecución del workflow."
+            }
+          }
+        }
+      },
+      "id": "966146b4-6be4-4d24-b4cd-d2f08637df74",
+      "name": "Formulario de carga",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        304
+      ],
+      "webhookId": "ae3c2a08-b647-4c43-9e7b-77a1205766f4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const salida = [];\nconst items = $input.all();\nfor (let i = 0; i < items.length; i++) {\n  const binarios = items[i].binary || {};\n  for (const clave of Object.keys(binarios)) {\n    const buffer = await this.helpers.getBinaryDataBuffer(i, clave);\n    const texto = buffer.toString('utf8').replace(/^\\uFEFF/, '').replace(/\\r\\n/g, '\\n');\n    const archivo = binarios[clave].fileName || clave;\n    const procedimiento = (texto.match(/\\*\\*Identificador:\\*\\*\\s*(PRO-[A-Z]{2}-\\d{3})/) || [])[1] || '';\n    const version = (texto.match(/\\*\\*Versión:\\*\\*\\s*(\\d+(?:\\.\\d+)*)/) || [])[1] || '';\n    const titulo = ((texto.match(/\\*\\*Título:\\*\\*\\s*(.+)/) || [])[1] || '').trim();\n    let motivo = '';\n    if (!archivo.toLowerCase().endsWith('.md')) motivo = 'El archivo no es Markdown';\n    else if (!procedimiento) motivo = 'No se encontró el identificador del procedimiento';\n    else if (!version) motivo = 'No se encontró la versión del procedimiento';\n    salida.push({ json: { archivo_origen: archivo, procedimiento, version, titulo, caracteres: texto.length, valido: motivo === '', motivo, texto } });\n  }\n}\nif (salida.length === 0) {\n  throw new Error('No se recibió ningún archivo.');\n}\nconst vistos = new Set();\nfor (const doc of salida) {\n  if (!doc.json.valido) continue;\n  if (vistos.has(doc.json.procedimiento)) {\n    doc.json.valido = false;\n    doc.json.motivo = 'Procedimiento repetido en la misma carga';\n  }\n  vistos.add(doc.json.procedimiento);\n}\nreturn salida;"
+      },
+      "id": "3e2c96db-dc65-4bc4-868e-29ea938a700a",
+      "name": "Leer archivos y metadatos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "v1",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5b6a8865-d1a1-4828-afbb-4557c4badc02",
+      "name": "Documento válido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        448,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const documentos = $input.all();\nconst salida = [];\nfor (const doc of documentos) {\n  const { texto, procedimiento, version, archivo_origen, titulo } = doc.json;\n  const partes = texto.split(/\\n(?=## )/);\n  let orden = 0;\n  for (const parte of partes) {\n    const cuerpo = parte.trim();\n    if (!cuerpo) continue;\n    const encabezado = cuerpo.match(/^## (\\d+)\\. (.+)/);\n    salida.push({\n      json: {\n        procedimiento,\n        version,\n        archivo_origen,\n        titulo,\n        tipo_documento: 'procedimiento',\n        seccion_numero: encabezado ? encabezado[1] : '0',\n        seccion_titulo: encabezado ? encabezado[2].trim() : 'Encabezado y aviso',\n        orden: String(orden),\n        texto: cuerpo,\n      },\n    });\n    orden++;\n  }\n}\nreturn salida;"
+      },
+      "id": "2c7ddec7-d0f5-4df7-8c95-afbff65475fd",
+      "name": "Dividir en secciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "dc23972d-b64b-4b5c-b238-87424833fb3a",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.4,
+      "position": [
+        1568,
+        208
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "7728aff4-ff90-4df4-b726-185da84ed5a3",
+      "name": "Embeddings Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        432
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.texto }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "tipo_documento",
+                "value": "={{ $json.tipo_documento }}"
+              },
+              {
+                "name": "procedimiento",
+                "value": "={{ $json.procedimiento }}"
+              },
+              {
+                "name": "version",
+                "value": "={{ $json.version }}"
+              },
+              {
+                "name": "titulo",
+                "value": "={{ $json.titulo }}"
+              },
+              {
+                "name": "archivo_origen",
+                "value": "={{ $json.archivo_origen }}"
+              },
+              {
+                "name": "seccion_numero",
+                "value": "={{ $json.seccion_numero }}"
+              },
+              {
+                "name": "seccion_titulo",
+                "value": "={{ $json.seccion_titulo }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "e6486d96-3c45-4b14-8f89-60adc401753b",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1664,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 1600,
+        "chunkOverlap": 150,
+        "options": {
+          "splitCode": "markdown"
+        }
+      },
+      "id": "92ba665d-98d7-43f9-945e-91b5107f7a10",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const porProcedimiento = {};\nfor (const item of $input.all()) {\n  const clave = (item.json.metadata || {}).procedimiento || 'SIN_IDENTIFICAR';\n  porProcedimiento[clave] = (porProcedimiento[clave] || 0) + 1;\n}\nconst documentos = $('Leer archivos y metadatos').all().map((d) => ({\n  archivo_origen: d.json.archivo_origen,\n  procedimiento: d.json.procedimiento,\n  version: d.json.version,\n  valido: d.json.valido,\n  motivo: d.json.motivo,\n}));\nreturn [{ json: { documentos_recibidos: documentos.length, documentos_validos: documentos.filter((d) => d.valido).length, fragmentos_insertados: $input.all().length, fragmentos_por_procedimiento: porProcedimiento, documentos } }];"
+      },
+      "id": "4b7e1b35-838e-417e-a20a-004f2935c4cb",
+      "name": "Resumen de la ingesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "x1",
+              "name": "archivo_origen",
+              "value": "={{ $json.archivo_origen }}",
+              "type": "string"
+            },
+            {
+              "id": "x2",
+              "name": "resultado",
+              "value": "RECHAZADO",
+              "type": "string"
+            },
+            {
+              "id": "x3",
+              "name": "motivo",
+              "value": "={{ $json.motivo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1054e3dd-d7df-4e2f-819b-18a5513a7086",
+      "name": "Documento rechazado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "documents",
+        "limit": 1,
+        "filterType": "string",
+        "filterString": "metadata->>procedimiento=eq.$1",
+        "filterStringParameters": {
+          "values": [
+            {
+              "value": "={{ $json.procedimiento }}"
+            }
+          ]
+        }
+      },
+      "id": "9fa2a6e0-b1c3-4418-b05a-ae8f0b1ca9c7",
+      "name": "Buscar procedimiento existente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        672,
+        208
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const existentes = new Set();\nfor (const fila of $input.all()) {\n  let metadata = fila.json.metadata;\n  if (typeof metadata === 'string') {\n    try { metadata = JSON.parse(metadata); } catch (e) { metadata = {}; }\n  }\n  if (metadata && metadata.procedimiento) existentes.add(metadata.procedimiento);\n}\nconst documentos = $('Leer archivos y metadatos').all().filter((d) => d.json.valido);\nreturn documentos.map((d) => {\n  const yaCargado = existentes.has(d.json.procedimiento);\n  return {\n    json: {\n      ...d.json,\n      ya_cargado: yaCargado,\n      motivo: yaCargado\n        ? 'El procedimiento ' + d.json.procedimiento + ' ya está cargado en la base documental. No se modificó. La actualización de versiones requiere un procedimiento de migración posterior.'\n        : '',\n    },\n  };\n});"
+      },
+      "id": "9ea9cd67-d2fa-4400-8b08-4c8cf165e049",
+      "name": "Clasificar por existencia",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "n1",
+              "leftValue": "={{ $json.ya_cargado }}",
+              "operator": {
+                "operation": "false",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "78ec5baf-7644-4aab-9365-44ac10b39310",
+      "name": "Procedimiento no cargado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "y1",
+              "name": "archivo_origen",
+              "type": "string",
+              "value": "={{ $json.archivo_origen }}"
+            },
+            {
+              "id": "y2",
+              "name": "procedimiento",
+              "type": "string",
+              "value": "={{ $json.procedimiento }}"
+            },
+            {
+              "id": "y3",
+              "name": "resultado",
+              "type": "string",
+              "value": "RECHAZADO"
+            },
+            {
+              "id": "y4",
+              "name": "motivo",
+              "type": "string",
+              "value": "={{ $json.motivo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de7867a5-70e5-4d3f-9bdf-4c75497eb0c8",
+      "name": "Procedimiento ya cargado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1344,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## WF-01 Ingesta documental RAG\nCarga procedimientos Markdown en Supabase (pgvector, 3072 dimensiones) para el RAG de WF-03.\n\n- Entrada: formulario con n8n User Auth.\n- Solo carga procedimientos nuevos; los existentes se rechazan sin modificar la base.\n- Datos ficticios (empresa ficticia, prototipo académico).",
+        "height": 340,
+        "width": 600
+      },
+      "id": "c5cdf7cc-97a0-445c-a061-dbf114ec1cd2",
+      "name": "Nota - WF-01",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Control antes de escribir\nArchivos sin identificador, sin versión o repetidos se rechazan.\n\n\"Buscar procedimiento existente\" es el primer acceso a Supabase. Si el procedimiento ya está cargado, se rechaza sin borrar ni reemplazar fragmentos. La actualización de versiones requiere una migración posterior.",
+        "height": 340,
+        "width": 620
+      },
+      "id": "7bba5a11-eee3-4ea5-bc3e-98912468e6e9",
+      "name": "Nota - Control antes de escribir",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Vectorización\nUn fragmento por sección Markdown (1600 caracteres, 150 de solapamiento).\nEmbeddings: gemini-embedding-001, 3072 dimensiones (el mismo modelo que usa WF-03 para buscar).\nTabla documents y función match_documents. Metadatos: procedimiento, versión, título, sección y archivo de origen.\n\nAl importar: reconfigurar las credenciales de Supabase y Gemini.",
+        "height": 340,
+        "width": 900
+      },
+      "id": "2a2a11f2-677e-4a1b-8827-8c66e4009336",
+      "name": "Nota - Vectorización",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -192
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Formulario de carga": {
+      "main": [
+        [
+          {
+            "node": "Leer archivos y metadatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer archivos y metadatos": {
+      "main": [
+        [
+          {
+            "node": "Documento válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Documento válido": {
+      "main": [
+        [
+          {
+            "node": "Buscar procedimiento existente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Documento rechazado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir en secciones": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Resumen de la ingesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar procedimiento existente": {
+      "main": [
+        [
+          {
+            "node": "Clasificar por existencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar por existencia": {
+      "main": [
+        [
+          {
+            "node": "Procedimiento no cargado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procedimiento no cargado": {
+      "main": [
+        [
+          {
+            "node": "Dividir en secciones",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procedimiento ya cargado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}

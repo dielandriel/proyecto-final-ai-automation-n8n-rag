@@ -1,0 +1,517 @@
+{
+  "name": "WF-04 Monitoreo de errores",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "69996077-77ec-4903-a13e-c3e758207311",
+      "name": "Falla no prevista",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizar falla no prevista (Error Trigger): toma solo campos permitidos.\n// El texto del error se usa únicamente para detectar palabras clave de un vocabulario fijo; nunca se copia.\nconst j = $input.first().json || {};\nconst ex = (j.execution && typeof j.execution === 'object') ? j.execution : {};\nconst tr = (j.trigger && typeof j.trigger === 'object') ? j.trigger : {};\nconst wf = (j.workflow && typeof j.workflow === 'object') ? j.workflow : {};\nconst err = (ex.error && typeof ex.error === 'object') ? ex.error : ((tr.error && typeof tr.error === 'object') ? tr.error : {});\nconst texto = [err.message, err.description, err.name].filter(x => typeof x === 'string').join(' ').slice(0, 2000);\nconst VOCABULARIO = [\n  ['falla_sintetica', /FALLA_SINTETICA_R1/],\n  ['credencial', /\\b(401|403)\\b|unauthori[sz]ed|forbidden|credential|invalid_grant|permission/i],\n  ['cuota', /\\b429\\b|rate limit|quota|too many requests/i],\n  ['tiempo', /timeout|timed out|ETIMEDOUT|ECONNABORTED/i],\n  ['conexion', /ECONNRESET|ENOTFOUND|ECONNREFUSED|socket hang up|network/i],\n  ['servicio', /\\b5\\d\\d\\b|service unavailable|bad gateway|not able to process/i],\n  ['codigo', /ReferenceError|TypeError|SyntaxError|is not defined|cannot read/i],\n  ['no_encontrado', /\\b404\\b|not found|does not exist/i],\n];\nconst pistas = VOCABULARIO.filter(([, re]) => re.test(texto)).map(([k]) => k);\nconst nodoTrigger = (tr.error && tr.error.node && typeof tr.error.node.name === 'string') ? tr.error.node.name : '';\nreturn [{ json: {\n  entrada: 'ERROR_TRIGGER', codigos: ['FALLA_NO_PREVISTA'], pistas,\n  workflow_id: String(wf.id ?? ''), workflow_nombre: String(wf.name ?? ''),\n  ejecucion_id: String(ex.id ?? ''), nodo: String(ex.lastNodeExecuted ?? nodoTrigger ?? ''),\n  falla_en_disparador: !ex.id && !!j.trigger, id_consulta: '', canal: '', codigo_error: '',\n} }];\n"
+      },
+      "id": "c94c23bc-f887-408c-bc7a-9da56c88e01d",
+      "name": "Normalizar falla no prevista",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clasificar y validar incidente: circuito único para ambas entradas. Solo campos permitidos y categorías fijas.\nconst n = $input.first().json || {};\nconst CODIGOS = ['FALLA_NO_PREVISTA', 'INTEGRACION_WF03', 'ERR_SHEETS', 'ERROR_PROCESAMIENTO', 'REGISTRO_NO_CONFIRMADO', 'AVISO_ERROR_ENVIO', 'AVISO_VERIFICACION_MANUAL'];\nconst CAT_CODIGO = { INTEGRACION_WF03: 'INTEGRACION', ERR_SHEETS: 'REGISTRO_SHEETS', ERROR_PROCESAMIENTO: 'PROCESAMIENTO', REGISTRO_NO_CONFIRMADO: 'REGISTRO_SHEETS', AVISO_ERROR_ENVIO: 'AVISO_GMAIL', AVISO_VERIFICACION_MANUAL: 'AVISO_GMAIL' };\nconst CAT_PISTA = { falla_sintetica: 'PRUEBA_SINTETICA', credencial: 'CREDENCIAL_O_PERMISOS', cuota: 'CUOTA_O_LIMITE', tiempo: 'TIEMPO_DE_ESPERA', conexion: 'CONEXION', servicio: 'SERVICIO_EXTERNO', codigo: 'ERROR_DE_CODIGO', no_encontrado: 'RECURSO_NO_ENCONTRADO' };\nconst ok = (v, re) => (typeof v === 'string' && re.test(v)) ? v : '';\nconst codigos = Array.isArray(n.codigos) ? n.codigos.filter(c => CODIGOS.includes(c)) : [];\nif (!codigos.length) return [{ json: { es_incidente: false, motivo: n.error ? 'ERROR_EN_NORMALIZACION' : 'SIN_INCIDENTE' } }];\nconst pistas = Array.isArray(n.pistas) ? n.pistas.filter(p => CAT_PISTA[p]) : [];\nconst codigo = codigos[0];\nconst categoria = codigo === 'FALLA_NO_PREVISTA' ? (pistas.length ? CAT_PISTA[pistas[0]] : 'OTRA') : CAT_CODIGO[codigo];\nconst severidad = ['FALLA_NO_PREVISTA', 'INTEGRACION_WF03', 'ERR_SHEETS', 'ERROR_PROCESAMIENTO', 'REGISTRO_NO_CONFIRMADO'].includes(codigo) ? 'Alta' : 'Media';\nconst inc = {\n  es_incidente: true, entrada: n.entrada === 'ERROR_TRIGGER' ? 'ERROR_TRIGGER' : 'INCIDENTE_CONTROLADO',\n  codigo, codigos, categoria, severidad,\n  workflow_id: ok(n.workflow_id, /^[A-Za-z0-9]{8,32}$/),\n  workflow_nombre: ok(n.workflow_nombre, /^[\\p{L}\\p{N} ._()-]{1,80}$/u) || 'Workflow no identificado',\n  ejecucion_id: ok(n.ejecucion_id, /^\\d{1,12}$/),\n  nodo: ok(n.nodo, /^[\\p{L}\\p{N} ._()-]{1,80}$/u),\n  falla_en_disparador: n.falla_en_disparador === true,\n  id_consulta: ok(n.id_consulta, /^CON-[A-Za-z0-9-]{1,60}$/),\n  canal: ['CHAT', 'WEBHOOK'].includes(n.canal) ? n.canal : '',\n  codigo_error: ok(n.codigo_error, /^ERR_[A-Z_]{3,30}$/),\n  fecha_hora: $now.setZone('America/Argentina/Buenos_Aires').toFormat('yyyy-MM-dd HH:mm'),\n};\n// Clave del incidente: identifica la ejecución o la consulta afectada y los códigos detectados.\nconst ref = inc.ejecucion_id ? (inc.workflow_id || inc.workflow_nombre) + ':' + inc.ejecucion_id : (inc.id_consulta || 'sin-referencia:' + inc.fecha_hora);\ninc.clave = inc.entrada + '|' + ref + '|' + codigos.join(',');\nreturn [{ json: inc }];\n"
+      },
+      "id": "ae3fc38f-3441-41bc-a284-d2977fabb9da",
+      "name": "Clasificar y validar incidente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        128
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "workflow_origen"
+            },
+            {
+              "name": "ejecucion_id"
+            },
+            {
+              "name": "id_consulta"
+            },
+            {
+              "name": "canal"
+            },
+            {
+              "name": "resultado_validacion"
+            },
+            {
+              "name": "estado_procesamiento"
+            },
+            {
+              "name": "codigo_error"
+            },
+            {
+              "name": "registro"
+            },
+            {
+              "name": "aviso_estado"
+            },
+            {
+              "name": "aviso_verificacion",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "id": "dbb59fd1-78b3-4fc3-a576-feb68d754970",
+      "name": "Incidente controlado",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizar incidente controlado (llamado desde WF-02): valida los campos recibidos y vuelve a aplicar las reglas.\n// Los casos normales (bloqueos de privacidad, legajos inválidos, rechazos, Gmail deshabilitado) no generan incidente.\nfunction codigosIncidente(d) {\n  const c = [];\n  if (d.resultado_validacion === 'RECHAZADA') return c;\n  if (d.resultado_validacion === 'ERROR_INTERNO') return ['ERROR_PROCESAMIENTO'];\n  if (d.registro === 'DESCONOCIDO') c.push('INTEGRACION_WF03');\n  if (d.codigo_error === 'ERR_SHEETS') c.push('ERR_SHEETS');\n  else if (d.estado_procesamiento === 'ERROR' && !c.includes('INTEGRACION_WF03')) c.push('ERROR_PROCESAMIENTO');\n  if (d.registro === 'NO_REGISTRADA' && !c.includes('ERR_SHEETS')) c.push('REGISTRO_NO_CONFIRMADO');\n  if (d.aviso_estado === 'ERROR_ENVIO') c.push('AVISO_ERROR_ENVIO');\n  if (d.aviso_estado === 'VERIFICACION_MANUAL' || d.aviso_verificacion === true) c.push('AVISO_VERIFICACION_MANUAL');\n  return c;\n}\nconst j = $input.first().json || {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst de = (v, lista) => lista.includes(s(v)) ? s(v) : '';\nconst d = {\n  resultado_validacion: de(j.resultado_validacion, ['VALIDA', 'BLOQUEADA_SALUD', 'RECHAZADA', 'ERROR_INTERNO']),\n  estado_procesamiento: de(j.estado_procesamiento, ['COMPLETADO', 'BLOQUEADO', 'ERROR', 'RECHAZADA']),\n  codigo_error: de(j.codigo_error, ['ERR_LLM_NO_DISPONIBLE', 'ERR_LLM_TIMEOUT', 'ERR_LLM_SALIDA_INVALIDA', 'ERR_VECTOR_STORE', 'ERR_SHEETS']),\n  registro: de(j.registro, ['REGISTRADA', 'YA_REGISTRADA', 'NO_REGISTRADA', 'DESCONOCIDO']),\n  aviso_estado: de(j.aviso_estado, ['NO_CORRESPONDE', 'NO_ENVIADO', 'PENDIENTE_DE_ENVIO', 'ENVIADO', 'ERROR_ENVIO', 'VERIFICACION_MANUAL']),\n  aviso_verificacion: j.aviso_verificacion === true,\n};\nreturn [{ json: {\n  entrada: 'INCIDENTE_CONTROLADO', codigos: codigosIncidente(d), pistas: [],\n  workflow_id: s(j.workflow_origen) === 'WF-02' ? 'REEMPLAZARIDWF02' : '', workflow_nombre: s(j.workflow_origen) === 'WF-02' ? 'WF-02 Recepción' : '',\n  ejecucion_id: s(j.ejecucion_id), nodo: '', falla_en_disparador: false,\n  id_consulta: s(j.id_consulta), canal: de(j.canal, ['CHAT', 'WEBHOOK']), codigo_error: d.codigo_error,\n} }];\n"
+      },
+      "id": "67ad1906-f38e-466e-adef-9228c825ba0f",
+      "name": "Normalizar incidente controlado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.es_incidente }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "810d650a-28f4-4943-937c-4bacd891dfed",
+      "name": "Es incidente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Evitar duplicados: guarda las claves notificadas en los datos estáticos del workflow (24 h, máximo 200).\n// Solo contiene claves técnicas (workflow, ejecución, consulta y códigos), sin datos personales.\n// n8n persiste estos datos solo en ejecuciones de producción; en pruebas manuales no se conservan.\nconst i = $input.first().json || {};\nlet duplicado = false;\ntry {\n  const st = $getWorkflowStaticData('global');\n  const ahora = Date.now(), TTL = 24 * 3600 * 1000;\n  st.incidentes = (Array.isArray(st.incidentes) ? st.incidentes : []).filter(x => x && ahora - x.t < TTL).slice(-199);\n  duplicado = st.incidentes.some(x => x.k === i.clave);\n  if (!duplicado) st.incidentes.push({ k: i.clave, t: ahora });\n} catch (e) { duplicado = false; }\nreturn [{ json: { ...i, duplicado } }];\n"
+      },
+      "id": "3c6bfb3a-a150-4d29-9ef8-ce14903e936d",
+      "name": "Evitar duplicados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        48
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.duplicado }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "807e7c18-9644-4f42-a543-b289839410ad",
+      "name": "Incidente nuevo",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Configuración de la alerta. Envío deshabilitado. Solo se envía a una casilla de la lista autorizada.\n// Antes de exportar el workflow, dejar estos valores vacíos.\nconst ALERTA_DESTINATARIOS_AUTORIZADOS = [];\nconst ALERTA_DESTINATARIO = '';\nconst ALERTA_ENVIO_HABILITADO = false;\nreturn [{ json: { ...$input.first().json, alerta_destinatario: ALERTA_DESTINATARIO, alerta_destinatarios_autorizados: ALERTA_DESTINATARIOS_AUTORIZADOS, alerta_envio_habilitado: ALERTA_ENVIO_HABILITADO } }];\n"
+      },
+      "id": "2bdb8bab-8bc5-49b0-9bd0-aa193c0bb6ee",
+      "name": "Configuración de alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -32
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar alerta: arma el correo solo con campos permitidos y lo valida antes de habilitar el envío.\nconst i = $input.first().json || {};\nconst DESC = {\n  FALLA_NO_PREVISTA: 'Falla no prevista: la ejecución terminó con error.',\n  INTEGRACION_WF03: 'WF-02 no obtuvo una respuesta válida de WF-03.',\n  ERR_SHEETS: 'Falla de Google Sheets: la consulta pudo no quedar registrada.',\n  ERROR_PROCESAMIENTO: 'La consulta terminó con estado ERROR.',\n  REGISTRO_NO_CONFIRMADO: 'No se confirmó el registro de la consulta en Consultas.',\n  AVISO_ERROR_ENVIO: 'Gmail rechazó el aviso de una derivación.',\n  AVISO_VERIFICACION_MANUAL: 'El resultado del aviso de derivación requiere verificación manual.',\n};\nconst asunto = '[PRUEBA ACADÉMICA] [ALERTA] ' + (i.severidad === 'Alta' ? '[ALTA] ' : '') + i.codigo + ' en ' + i.workflow_nombre;\nconst cuerpo = [\n  'Alerta de monitoreo (prototipo académico, datos ficticios).', '',\n  'Incidente: ' + (DESC[i.codigo] || i.codigo),\n  'Códigos detectados: ' + (i.codigos || []).join(', '),\n  'Categoría: ' + i.categoria,\n  'Severidad: ' + i.severidad,\n  'Workflow: ' + i.workflow_nombre,\n  'Ejecución: ' + (i.ejecucion_id || 'no disponible'),\n  'Nodo: ' + (i.nodo || 'no disponible') + (i.falla_en_disparador ? ' (falla en el disparador)' : ''),\n  'Consulta: ' + (i.id_consulta || 'no disponible'),\n  'Canal: ' + (i.canal || 'no disponible'),\n  'Código de error registrado: ' + (i.codigo_error || 'ninguno'),\n  'Fecha y hora: ' + i.fecha_hora, '',\n  'Revisá la ejecución en n8n. Este aviso no incluye mensajes, legajos, encabezados ni detalles técnicos del error.',\n].join('\\n');\nconst salida = (alerta, enviar, correo) => [{ json: { ...i, alerta, enviar, correo: correo || null } }];\n// Control de contenido previo al envío\nconst prohibido = /@|LEG-\\d{4}|\\d{13,}|token|password|contrase[ñn]a|bearer|authorization|x-cordal|stack|at \\S+\\.js/i;\nif (prohibido.test(asunto + '\\n' + cuerpo)) return salida({ estado: 'NO_ENVIADA', motivo: 'CONTENIDO_NO_PERMITIDO' }, false, { asunto, cuerpo });\nconst dest = String(i.alerta_destinatario || '').trim().toLowerCase();\nconst aut = Array.isArray(i.alerta_destinatarios_autorizados) ? i.alerta_destinatarios_autorizados.map(x => String(x).trim().toLowerCase()) : [];\nif (!dest || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(dest) || /@cordal\\.example$/.test(dest) || !aut.includes(dest)) return salida({ estado: 'NO_ENVIADA', motivo: 'SIN_DESTINATARIO_AUTORIZADO' }, false, { asunto, cuerpo });\nif (i.alerta_envio_habilitado !== true) return salida({ estado: 'NO_ENVIADA', motivo: 'ENVIO_DESHABILITADO' }, false, { asunto, cuerpo });\nreturn salida({ estado: 'PENDIENTE_DE_ENVIO', motivo: '' }, true, { para: dest, asunto, cuerpo });\n"
+      },
+      "id": "42b0ea02-5f53-4a0b-8b9a-f7a9cc600948",
+      "name": "Preparar alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        -32
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.enviar }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e2fa01ee-7bfd-4cf8-aa18-6c483edae72b",
+      "name": "Enviar alerta",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.correo.para }}",
+        "subject": "={{ $json.correo.asunto }}",
+        "emailType": "text",
+        "message": "={{ $json.correo.cuerpo }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "95579e20-b04a-4afa-8fe8-2087ac6acec9",
+      "name": "Enviar alerta por Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        -112
+      ],
+      "webhookId": "d681be87-93c3-4398-8fb0-c2f97627a3d3",
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail OAuth2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resultado del monitoreo: resumen final con campos técnicos permitidos, para cualquier ruta.\nlet cl = {}, inc = null, prep = null;\ntry { cl = $('Clasificar y validar incidente').first().json || {}; } catch (e) { cl = {}; }\ntry { if ($('Evitar duplicados').isExecuted) inc = $('Evitar duplicados').first().json; } catch (e) { inc = null; }\ntry { if ($('Preparar alerta').isExecuted) prep = $('Preparar alerta').first().json; } catch (e) { prep = null; }\nconst r = $input.first().json || {};\nlet alerta;\nif (!cl.es_incidente) alerta = { estado: 'NO_CORRESPONDE', motivo: cl.motivo || 'SIN_INCIDENTE' };\nelse if (inc && inc.duplicado) alerta = { estado: 'DUPLICADA', motivo: 'INCIDENTE_YA_NOTIFICADO' };\nelse if (!prep) alerta = { estado: 'ERROR', motivo: 'ALERTA_NO_PREPARADA' };\nelse if (!prep.enviar) alerta = prep.alerta;\nelse {\n  const id = (!r.error && typeof r.id === 'string') ? r.id : '';\n  const txt = r.error ? JSON.stringify(r.error) : '';\n  if (id) alerta = { estado: 'ENVIADA', motivo: '', id_mensaje: id };\n  else if (r.error && /\\b(400|401|403|404|429)\\b|bad request|unauthori|forbidden|invalid_grant|quota|rate limit/i.test(txt) && !/timeout|ECONNRESET|socket hang up|\\b5\\d\\d\\b/i.test(txt)) alerta = { estado: 'ERROR', motivo: 'ERROR_GMAIL' };\n  else alerta = { estado: 'VERIFICACION_MANUAL', motivo: r.error ? 'RESULTADO_INCIERTO_GMAIL' : 'SIN_CONFIRMACION_DE_GMAIL' };\n}\nreturn [{ json: { clave: cl.clave || '', entrada: cl.entrada || '', codigo: cl.codigo || '', categoria: cl.categoria || '', severidad: cl.severidad || '',\n  workflow: cl.workflow_nombre || '', ejecucion_id: cl.ejecucion_id || '', id_consulta: cl.id_consulta || '', alerta } }];\n"
+      },
+      "id": "d09fe7cf-ec36-4eb4-97d7-fe3fcee54ff2",
+      "name": "Resultado del monitoreo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        128
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## WF-04 Monitoreo de errores\nDos entradas:\n- Error Trigger: fallas no previstas de los workflows que lo tengan como workflow de errores.\n- Incidente controlado: errores técnicos manejados por WF-02.\n\nNo guarda ejecuciones. Solo WF-02 puede llamarlo.",
+        "height": 340,
+        "width": 460
+      },
+      "id": "85267933-7e8c-4407-8ea0-b58f7cd12b7d",
+      "name": "Nota - WF-04",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Normalización y clasificación\nSolo campos técnicos permitidos. El texto del error se usa para detectar pistas de un vocabulario fijo y nunca se copia.\nCódigos, categorías y severidad de listas cerradas.",
+        "height": 340,
+        "width": 460
+      },
+      "id": "c06be80d-0718-481a-b07e-1a287a10af1a",
+      "name": "Nota - Normalización y clasificación",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Deduplicación\nClaves notificadas en datos estáticos del workflow (24 h, máximo 200). n8n solo las conserva en ejecuciones de producción.",
+        "height": 340,
+        "width": 460
+      },
+      "id": "5414f8c3-2ab7-4812-88fd-a95c149f1438",
+      "name": "Nota - Deduplicación",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        944,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Alerta\nAsunto y cuerpo con campos fijos, sin mensajes, legajos, encabezados ni errores técnicos. Control de contenido antes del envío. Gmail sin reintentos.\n\nVersión de entrega: envío deshabilitado y destinatario vacío.\nPendiente de producción: vincularlo como workflow de errores de WF-02 y WF-03.\n\nAl importar: reconfigurar Gmail.",
+        "height": 340,
+        "width": 1040
+      },
+      "id": "f9bc1971-882d-4256-a343-45331e4ba0c7",
+      "name": "Nota - Alerta",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -512
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Falla no prevista": {
+      "main": [
+        [
+          {
+            "node": "Normalizar falla no prevista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar falla no prevista": {
+      "main": [
+        [
+          {
+            "node": "Clasificar y validar incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar y validar incidente": {
+      "main": [
+        [
+          {
+            "node": "Es incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incidente controlado": {
+      "main": [
+        [
+          {
+            "node": "Normalizar incidente controlado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar incidente controlado": {
+      "main": [
+        [
+          {
+            "node": "Clasificar y validar incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es incidente": {
+      "main": [
+        [
+          {
+            "node": "Evitar duplicados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado del monitoreo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evitar duplicados": {
+      "main": [
+        [
+          {
+            "node": "Incidente nuevo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incidente nuevo": {
+      "main": [
+        [
+          {
+            "node": "Configuración de alerta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado del monitoreo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuración de alerta": {
+      "main": [
+        [
+          {
+            "node": "Preparar alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar alerta": {
+      "main": [
+        [
+          {
+            "node": "Enviar alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar alerta": {
+      "main": [
+        [
+          {
+            "node": "Enviar alerta por Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado del monitoreo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar alerta por Gmail": {
+      "main": [
+        [
+          {
+            "node": "Resultado del monitoreo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "callerPolicy": "workflowsFromAList",
+    "callerIds": "REEMPLAZARIDWF02"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

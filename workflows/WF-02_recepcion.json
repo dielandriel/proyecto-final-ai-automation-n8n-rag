@@ -1,0 +1,914 @@
+{
+  "name": "WF-02 Recepción",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "authentication": "n8nUserAuth",
+        "includeUserInOutput": false,
+        "initialMessages": "Hola. Soy el asistente de procesos internos de Cordal Tecnología (prototipo académico con datos ficticios).\nEscribí tu legajo al inicio de cada mensaje, por ejemplo: LEG-0007 ¿Cuántos días de vacaciones tengo disponibles?\nNo recuerdo mensajes anteriores: incluí la consulta completa en cada mensaje y no envíes datos de salud.",
+        "options": {
+          "allowFileUploads": false,
+          "inputPlaceholder": "LEG-0000 Escribí tu consulta",
+          "loadPreviousSession": "notSupported",
+          "subtitle": "Cordal Tecnología - prototipo académico",
+          "title": "Asistente de procesos internos",
+          "responseMode": "lastNode",
+          "autoSaveHighlightedData": false
+        }
+      },
+      "id": "dbe0fe36-68ef-4e6a-a9ea-413f18744be5",
+      "name": "Chat de empleados",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "b8f2fa3f-7078-4409-876f-59c1b1f4fe8d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizar chat: toma solo el texto escrito por el empleado. El canal lo fija el workflow.\nconst j = $input.first().json || {};\nreturn [{ json: { origen: 'CHAT', texto: typeof j.chatInput === 'string' ? j.chatInput : '', legajo_declarado: '', campos_ignorados: [] } }];\n"
+      },
+      "id": "e0b0f158-7e40-46f4-b4d5-2f06bcb66b17",
+      "name": "Normalizar chat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validación previa: lógica fija, sin IA. Decide si la consulta puede pasar a WF-03.\n// Genera el identificador de la consulta a partir de la ejecución de WF-02; el usuario no puede elegirlo.\nconst n = $input.first().json;\nconst texto = String(n.texto || '').replace(/\\s+/g, ' ').trim();\nconst id_consulta = 'CON-' + $execution.id;\nconst fecha_hora = $now.setZone('America/Argentina/Buenos_Aires').toFormat('yyyy-MM-dd HH:mm');\nconst MAX = 1000;\n\nconst RESP_FORMATO = 'Para atender tu consulta necesito tu legajo al inicio del mensaje, con el formato LEG-0000. Por ejemplo: LEG-0007 ¿Cuántos días de vacaciones tengo disponibles?';\nconst RESP_VACIO = 'No recibí ninguna consulta. Escribí tu legajo y tu consulta completa en un solo mensaje, por ejemplo: LEG-0007 ¿Cuántos días de vacaciones tengo disponibles?';\nconst RESP_LARGO = 'Tu mensaje es demasiado largo. Resumí la consulta en menos de ' + MAX + ' caracteres y volvé a enviarla con tu legajo al inicio.';\nconst RESP_SALUD = 'Por tu privacidad, no proceso información de salud por este canal. No incluyas diagnósticos, síntomas ni tratamientos. Para temas de licencias médicas comunicate con Salud Ocupacional.';\n\nconst base = { id_consulta, origen: n.origen, fecha_hora, campos_ignorados: n.campos_ignorados || [] };\nconst fin = (resultado, motivo, respuesta, extra = {}) => [{ json: { ...base, resultado, motivo, respuesta, ...extra } }];\n\nif (!texto) return fin('RECHAZADA', 'MENSAJE_VACIO', RESP_VACIO);\nif (texto.length > MAX) return fin('RECHAZADA', 'MENSAJE_DEMASIADO_LARGO', RESP_LARGO);\n\n// Legajo: al inicio del mensaje; en el webhook también puede venir en el campo \"legajo\".\nconst m = texto.match(/^LEG-(\\d{4})\\b/i);\nconst enMensaje = m ? 'LEG-' + m[1] : '';\nconst declarado = String(n.legajo_declarado || '').trim().toUpperCase();\nif (declarado && !/^LEG-\\d{4}$/.test(declarado)) return fin('RECHAZADA', 'LEGAJO_FORMATO_INVALIDO', RESP_FORMATO);\nif (declarado && enMensaje && declarado !== enMensaje) return fin('RECHAZADA', 'LEGAJO_INCONSISTENTE', RESP_FORMATO);\nconst legajo = declarado || enMensaje;\nif (!legajo) return fin('RECHAZADA', 'SIN_LEGAJO', RESP_FORMATO);\nconst consulta = texto.replace(/^LEG-\\d{4}[\\s:,.-]*/i, '').trim();\nif (!consulta) return fin('RECHAZADA', 'MENSAJE_VACIO', RESP_VACIO, { legajo });\n\n// Posible información clínica: no llega al modelo ni a WF-03. Detección por patrones (puede tener falsos positivos y negativos).\nconst SALUD = /(diagn[oó]stic|me diagnosticaron|s[ií]ntoma|enfermedad|enferm[oa] de|tratamiento m[eé]dic|medicaci[oó]n|medicamento|me oper|operaci[oó]n quir|internad[oa]|embaraz|depresi[oó]n|ansiedad|psiqui|psic[oó]log|covid|gripe|fiebre|c[aá]ncer|diabetes|\\bvih\\b|\\bhiv\\b|lesi[oó]n|fractura)/i;\nif (SALUD.test(consulta)) return fin('BLOQUEADA_SALUD', 'POSIBLE_DATO_CLINICO', RESP_SALUD, { legajo });\n\n// Mensaje que recibe WF-03: legajo validado al inicio + consulta, como en el canal de chat.\nreturn fin('VALIDA', '', '', { legajo, mensaje: legajo + ' ' + consulta });\n"
+      },
+      "id": "23ffa278-4983-443f-80cc-06acd41b99fe",
+      "name": "Validación previa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        128
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cordal-consultas",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "ignoreBots": false
+        }
+      },
+      "id": "a4aa1e89-55bb-4722-854d-d09d84254db9",
+      "name": "Consulta por webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        240
+      ],
+      "webhookId": "9a2a8889-3d0a-4317-a021-2b13e358e972",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Header Auth - Webhook WF-02"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizar webhook: acepta solo \"mensaje\" y, opcionalmente, \"legajo\". Cualquier otro campo del cuerpo\n// (id_consulta, origen, estado_aviso, etc.) se ignora: los campos internos los fija el workflow.\nconst j = $input.first().json || {};\nconst body = (j.body && typeof j.body === 'object' && !Array.isArray(j.body)) ? j.body : {};\nconst PERMITIDOS = ['mensaje', 'legajo'];\nreturn [{ json: {\n  origen: 'WEBHOOK',\n  texto: typeof body.mensaje === 'string' ? body.mensaje : '',\n  legajo_declarado: typeof body.legajo === 'string' ? body.legajo : '',\n  campos_ignorados: Object.keys(body).filter(k => !PERMITIDOS.includes(k)),\n} }];\n"
+      },
+      "id": "9f8f89ed-0619-4ce5-9cc3-27635badcf30",
+      "name": "Normalizar webhook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.resultado }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "VALIDA"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Válida"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.resultado }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "BLOQUEADA_SALUD"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Bloqueada por salud"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Rechazada"
+        }
+      },
+      "id": "21c3c3f0-39b6-4f39-8d3c-37eb6dabb761",
+      "name": "Ruta de la consulta",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WF-03 Procesamiento",
+          "mode": "id",
+          "value": "REEMPLAZARIDWF03"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_consulta": "={{ $json.id_consulta }}",
+            "origen": "={{ $json.origen }}",
+            "legajo": "={{ $json.legajo }}",
+            "mensaje": "={{ $json.mensaje }}",
+            "fecha_hora": "={{ $json.fecha_hora }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_consulta",
+              "displayName": "id_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "legajo",
+              "displayName": "legajo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "d1fcd567-9c06-4934-a69a-741334229436",
+      "name": "Procesar en WF-03",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        960,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Respuesta final: último nodo común a los dos canales.\n// El canal se determina por el disparador que se ejecutó, no por datos del usuario.\n// Chat: solo el texto para el empleado. Webhook: JSON reducido; lo envía el nodo \"Responder al webhook\".\nconst ERROR_TXT = 'En este momento no puedo procesar tu consulta. Por favor, intentá de nuevo más tarde o comunicate con el área correspondiente.';\nlet canal = 'CHAT';\ntry { if ($('Consulta por webhook').isExecuted) canal = 'WEBHOOK'; } catch (e) { canal = 'CHAT'; }\nlet v = {};\ntry { v = $('Validación previa').first().json || {}; } catch (e) { v = {}; }\nconst r = $input.first().json || {};\nlet res;\nif (v.resultado === 'VALIDA') {\n  // Resultado de WF-03. Si la llamada falló, no hay respuesta válida: texto fijo y estado ERROR.\n  const ok = !r.error && typeof r.respuesta === 'string' && r.respuesta && r.id_consulta === v.id_consulta;\n  res = ok\n    ? { respuesta: r.respuesta, decision: r.decision || '', estado_procesamiento: r.estado_procesamiento || '', registro: r.registro || '', aviso: (r.aviso && r.aviso.estado) || '' }\n    : { respuesta: ERROR_TXT, decision: '', estado_procesamiento: 'ERROR', registro: 'DESCONOCIDO', aviso: 'NO_CORRESPONDE' };\n} else if (v.resultado === 'BLOQUEADA_SALUD') {\n  const reg = (!r.error && r.id_consulta === v.id_consulta) ? 'REGISTRADA' : 'NO_REGISTRADA';\n  res = { respuesta: v.respuesta, decision: '', estado_procesamiento: 'BLOQUEADO', registro: reg, aviso: 'NO_CORRESPONDE' };\n} else if (v.resultado === 'RECHAZADA') {\n  res = { respuesta: v.respuesta || ERROR_TXT, decision: '', estado_procesamiento: 'RECHAZADA', registro: 'NO_REGISTRADA', aviso: 'NO_CORRESPONDE' };\n} else {\n  // Falla interna de WF-02 (por ejemplo, un error en la normalización o en la validación).\n  res = { respuesta: ERROR_TXT, decision: '', estado_procesamiento: 'ERROR', registro: 'NO_REGISTRADA', aviso: 'NO_CORRESPONDE' };\n}\nif (canal === 'WEBHOOK') {\n  return [{ json: { id_consulta: typeof v.id_consulta === 'string' ? v.id_consulta : '', origen: 'WEBHOOK', respuesta: res.respuesta, decision: res.decision,\n    estado_procesamiento: res.estado_procesamiento, registro: res.registro, aviso: res.aviso } }];\n}\nconst ref = res.registro === 'REGISTRADA' || res.registro === 'YA_REGISTRADA' ? '\\n\\nReferencia de tu consulta: ' + v.id_consulta : '';\nreturn [{ json: { output: res.respuesta + ref } }];\n"
+      },
+      "id": "fa57f0fc-26ef-4d3b-be03-c7b5deb297d7",
+      "name": "Respuesta final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fila de bloqueo por posible dato clínico (diseño 7.5): la clasificación la asigna esta regla, no el AI Agent.\n// No se registra el mensaje: el resumen es un texto fijo.\nconst v = $input.first().json;\nreturn [{ json: { ...v, fila: {\n  id_consulta: v.id_consulta, fecha_hora: v.fecha_hora, origen: v.origen, legajo: v.legajo,\n  procedimiento: 'PRO-RH-002', categoria: 'Dato sensible', decision: '', estado_procesamiento: 'BLOQUEADO', codigo_error: '',\n  area_destino: 'Salud Ocupacional', urgencia: 'Normal', resumen: '[contenido no registrado]', fuentes: '', id_solicitud: '',\n  estado_derivacion: 'Pendiente', estado_aviso: 'NO_APLICA',\n} } }];\n"
+      },
+      "id": "4bb8d1b4-85a9-4775-b92f-2463954ed999",
+      "name": "Preparar registro de bloqueo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        160
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REEMPLAZAR_ID_PLANILLA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Consultas"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_consulta": "={{ $json.fila.id_consulta }}",
+            "fecha_hora": "={{ $json.fila.fecha_hora }}",
+            "origen": "={{ $json.fila.origen }}",
+            "legajo": "={{ $json.fila.legajo }}",
+            "procedimiento": "={{ $json.fila.procedimiento }}",
+            "categoria": "={{ $json.fila.categoria }}",
+            "decision": "={{ $json.fila.decision }}",
+            "estado_procesamiento": "={{ $json.fila.estado_procesamiento }}",
+            "codigo_error": "={{ $json.fila.codigo_error }}",
+            "area_destino": "={{ $json.fila.area_destino }}",
+            "urgencia": "={{ $json.fila.urgencia }}",
+            "resumen": "={{ $json.fila.resumen }}",
+            "fuentes": "={{ $json.fila.fuentes }}",
+            "id_solicitud": "={{ $json.fila.id_solicitud }}",
+            "estado_derivacion": "={{ $json.fila.estado_derivacion }}",
+            "estado_aviso": "={{ $json.fila.estado_aviso }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_consulta",
+              "displayName": "id_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "legajo",
+              "displayName": "legajo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "procedimiento",
+              "displayName": "procedimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_procesamiento",
+              "displayName": "estado_procesamiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "codigo_error",
+              "displayName": "codigo_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "area_destino",
+              "displayName": "area_destino",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgencia",
+              "displayName": "urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumen",
+              "displayName": "resumen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fuentes",
+              "displayName": "fuentes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_solicitud",
+              "displayName": "id_solicitud",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_derivacion",
+              "displayName": "estado_derivacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_aviso",
+              "displayName": "estado_aviso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "25a866db-70bb-4bda-99a4-34655c0a0c54",
+      "name": "Registrar bloqueo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "canal",
+              "leftValue": "={{ $('Consulta por webhook').isExecuted }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "cb118471-3be0-40e4-a9fd-e0c456952bd5",
+      "name": "Canal webhook",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ id_consulta: $json.id_consulta, origen: $json.origen, respuesta: $json.respuesta, decision: $json.decision, estado_procesamiento: $json.estado_procesamiento, registro: $json.registro, aviso: $json.aviso }) }}",
+        "options": {
+          "responseCode": 200,
+          "enableStreaming": false
+        }
+      },
+      "id": "b5a43bad-2b91-4c73-bc7c-fe43a7097826",
+      "name": "Responder al webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1920,
+        48
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ab4abe57-8aa4-49f4-a6d1-7ac778b8949c",
+      "name": "Respuesta del chat",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detectar incidente: rama de monitoreo de WF-02. Solo lee resultados ya calculados; no modifica la respuesta.\n// Si no hay incidente técnico, no emite nada y WF-04 no se llama. Nunca envía mensajes, legajos ni encabezados.\nfunction codigosIncidente(d) {\n  const c = [];\n  if (d.resultado_validacion === 'RECHAZADA') return c;\n  if (d.resultado_validacion === 'ERROR_INTERNO') return ['ERROR_PROCESAMIENTO'];\n  if (d.registro === 'DESCONOCIDO') c.push('INTEGRACION_WF03');\n  if (d.codigo_error === 'ERR_SHEETS') c.push('ERR_SHEETS');\n  else if (d.estado_procesamiento === 'ERROR' && !c.includes('INTEGRACION_WF03')) c.push('ERROR_PROCESAMIENTO');\n  if (d.registro === 'NO_REGISTRADA' && !c.includes('ERR_SHEETS')) c.push('REGISTRO_NO_CONFIRMADO');\n  if (d.aviso_estado === 'ERROR_ENVIO') c.push('AVISO_ERROR_ENVIO');\n  if (d.aviso_estado === 'VERIFICACION_MANUAL' || d.aviso_verificacion === true) c.push('AVISO_VERIFICACION_MANUAL');\n  return c;\n}\nlet canal = 'CHAT';\ntry { if ($('Consulta por webhook').isExecuted) canal = 'WEBHOOK'; } catch (e) { canal = 'CHAT'; }\nlet v = {};\ntry { v = $('Validación previa').first().json || {}; } catch (e) { v = {}; }\nconst d = {\n  workflow_origen: 'WF-02', ejecucion_id: String($execution.id || ''),\n  id_consulta: /^CON-[A-Za-z0-9-]{1,60}$/.test(String(v.id_consulta || '')) ? v.id_consulta : '',\n  canal, resultado_validacion: '', estado_procesamiento: '', codigo_error: '', registro: '', aviso_estado: '', aviso_verificacion: false,\n};\nif (v.resultado === 'VALIDA') {\n  let r = {};\n  try { r = $('Procesar en WF-03').first().json || {}; } catch (e) { r = { error: true }; }\n  const ok = !r.error && typeof r.respuesta === 'string' && r.id_consulta === v.id_consulta;\n  d.resultado_validacion = 'VALIDA';\n  if (!ok) { d.estado_procesamiento = 'ERROR'; d.registro = 'DESCONOCIDO'; }\n  else {\n    d.estado_procesamiento = String(r.estado_procesamiento || ''); d.codigo_error = String(r.codigo_error || ''); d.registro = String(r.registro || '');\n    d.aviso_estado = String((r.aviso && r.aviso.estado) || ''); d.aviso_verificacion = !!(r.aviso && r.aviso.verificacion_manual === true);\n  }\n} else if (v.resultado === 'BLOQUEADA_SALUD') {\n  let b = {};\n  try { b = $('Registrar bloqueo').first().json || {}; } catch (e) { b = { error: true }; }\n  const reg = !b.error && b.id_consulta === v.id_consulta;\n  d.resultado_validacion = 'BLOQUEADA_SALUD'; d.estado_procesamiento = 'BLOQUEADO';\n  d.registro = reg ? 'REGISTRADA' : 'NO_REGISTRADA'; d.codigo_error = reg ? '' : 'ERR_SHEETS';\n} else if (v.resultado === 'RECHAZADA') {\n  d.resultado_validacion = 'RECHAZADA';\n} else {\n  d.resultado_validacion = 'ERROR_INTERNO'; d.estado_procesamiento = 'ERROR';\n}\nif (!codigosIncidente(d).length) return [];\nreturn [{ json: d }];\n"
+      },
+      "id": "8b71032d-27a4-43d0-9661-05adb94538e8",
+      "name": "Detectar incidente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        -144
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "WF-04 Monitoreo de errores",
+          "mode": "id",
+          "value": "REEMPLAZARIDWF04"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "workflow_origen",
+              "id": "workflow_origen",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "ejecucion_id",
+              "id": "ejecucion_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "id_consulta",
+              "id": "id_consulta",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "canal",
+              "id": "canal",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "resultado_validacion",
+              "id": "resultado_validacion",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "estado_procesamiento",
+              "id": "estado_procesamiento",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "codigo_error",
+              "id": "codigo_error",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "registro",
+              "id": "registro",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "aviso_estado",
+              "id": "aviso_estado",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "aviso_verificacion",
+              "id": "aviso_verificacion",
+              "required": false,
+              "type": "boolean"
+            }
+          ],
+          "value": {
+            "aviso_estado": "={{ $json.aviso_estado }}",
+            "aviso_verificacion": "={{ $json.aviso_verificacion }}",
+            "canal": "={{ $json.canal }}",
+            "codigo_error": "={{ $json.codigo_error }}",
+            "ejecucion_id": "={{ $json.ejecucion_id }}",
+            "estado_procesamiento": "={{ $json.estado_procesamiento }}",
+            "id_consulta": "={{ $json.id_consulta }}",
+            "registro": "={{ $json.registro }}",
+            "resultado_validacion": "={{ $json.resultado_validacion }}",
+            "workflow_origen": "={{ $json.workflow_origen }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "5f4cdf9c-2273-4e7d-b307-f3f3ba5c5c32",
+      "name": "Reportar incidente a WF-04",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1920,
+        -144
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## WF-02 Recepción\nDos entradas: chat (Hosted Chat, n8n User Auth) y webhook POST (Header Auth, encabezado X-Cordal-Token).\n\nNo guarda ejecuciones. El legajo es una identificación simulada, no autenticación.\n\nAl importar: reconfigurar Header Auth y Google Sheets.",
+        "height": 320,
+        "width": 440
+      },
+      "id": "40740acf-1522-4273-950d-27edf9b14104",
+      "name": "Nota - WF-02",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Validación previa (sin IA)\nGenera id_consulta y fecha_hora; el usuario no puede elegirlos.\nRechaza mensajes vacíos, de más de 1000 caracteres o sin legajo válido.\nBloquea posible información clínica antes del modelo y la registra con texto fijo.\nIgnora campos internos enviados por el cliente.",
+        "height": 320,
+        "width": 460
+      },
+      "id": "6f48745c-677c-404b-a782-8735461d426e",
+      "name": "Nota - Validación previa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Procesamiento\nLlama a WF-03 con espera.\n\nSi la llamada falla, el empleado recibe un texto fijo y la consulta queda con registro DESCONOCIDO.",
+        "height": 320,
+        "width": 460
+      },
+      "id": "a4c70c72-4d1b-4f44-a60d-821dd14cb380",
+      "name": "Nota - Procesamiento",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Respuesta y monitoreo\nChat: solo texto. Webhook: JSON de 7 campos, sin encabezados ni datos de control.\n\n\"Detectar incidente\" reporta a WF-04 solo errores técnicos (10 campos, sin mensaje ni legajo), sin esperar respuesta. Está ubicado arriba para ejecutarse antes de la respuesta del chat.",
+        "height": 320,
+        "width": 760
+      },
+      "id": "489d1e5c-6897-4903-8c3f-d70f16486656",
+      "name": "Nota - Respuesta y monitoreo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -512
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat de empleados": {
+      "main": [
+        [
+          {
+            "node": "Normalizar chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar chat": {
+      "main": [
+        [
+          {
+            "node": "Validación previa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validación previa": {
+      "main": [
+        [
+          {
+            "node": "Ruta de la consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta por webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalizar webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar webhook": {
+      "main": [
+        [
+          {
+            "node": "Validación previa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta de la consulta": {
+      "main": [
+        [
+          {
+            "node": "Procesar en WF-03",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar registro de bloqueo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar en WF-03": {
+      "main": [
+        [
+          {
+            "node": "Respuesta final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar registro de bloqueo": {
+      "main": [
+        [
+          {
+            "node": "Registrar bloqueo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar bloqueo": {
+      "main": [
+        [
+          {
+            "node": "Respuesta final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta final": {
+      "main": [
+        [
+          {
+            "node": "Canal webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Detectar incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Canal webhook": {
+      "main": [
+        [
+          {
+            "node": "Responder al webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta del chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar incidente": {
+      "main": [
+        [
+          {
+            "node": "Reportar incidente a WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timezone": "America/Argentina/Buenos_Aires",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "callerPolicy": "none"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
