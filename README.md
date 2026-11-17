@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** pendientes de incorporación. El estado de cada captura figura en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** incorporadas las capturas de WF-01; las de WF-02, WF-03, WF-04 y de la ejecución exitosa están pendientes. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -92,6 +92,22 @@ Las líneas punteadas son rutas implementadas y probadas que dependen de configu
 | WF-04 Monitoreo de errores | Normaliza y clasifica fallas e incidentes, evita duplicados y prepara una alerta sanitizada | Error Trigger y Execute Workflow Trigger | 17 |
 
 Detalle completo nodo por nodo: [`docs/ARQUITECTURA_PROYECTO_FINAL.md`](docs/ARQUITECTURA_PROYECTO_FINAL.md) (versión 2.0).
+
+### Capturas del canvas
+
+**WF-01 Ingesta documental RAG.** La panorámica muestra el flujo completo; los nombres de los nodos y el texto de las notas se leen en las capturas de detalle.
+
+![Canvas de WF-01 Ingesta documental RAG](capturas/01_WF-01_canvas.png)
+
+Detalles:
+
+- [Entrada, validación y control de existencia](capturas/01d_WF-01_entrada_validacion.png)
+- [Supabase Vector Store, embeddings, Data Loader y Text Splitter](capturas/01e_WF-01_supabase_embeddings.png)
+- [Nota "WF-01 Ingesta documental RAG"](capturas/01a_WF-01_nota_ingesta.png)
+- [Nota "Control antes de escribir"](capturas/01b_WF-01_nota_control.png)
+- [Nota "Vectorización"](capturas/01c_WF-01_nota_vectorizacion.png)
+
+Las capturas de WF-02, WF-03, WF-04 y de una ejecución exitosa están pendientes ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
 
 ### Herramientas utilizadas
 
@@ -510,7 +526,8 @@ docs/
 datos/
   BASE_DATOS_PROYECTO_FINAL_demo.xlsx   Copia demostrativa de la planilla (datos ficticios)
 capturas/
-  INDICE_EVIDENCIAS.md   Inventario y estado de las capturas (pendientes)
+  INDICE_EVIDENCIAS.md   Inventario y estado de las capturas
+  01*_WF-01_*.png        Canvas de WF-01 (panorámica y 5 detalles)
 ```
 
 ## 14. Correspondencia con la consigna
@@ -526,7 +543,7 @@ capturas/
 | Manejo de errores y casos límite | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Pendiente.** Inventario y estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01 incorporado ([sección 2](#capturas-del-canvas)); canvas de WF-02, WF-03 y WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 

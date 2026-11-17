@@ -10,12 +10,32 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
 |---|---|---|---|---|---|---|
-| `01_WF-01_canvas.png` | WF-01 | Canvas completo de la ingesta RAG | — | — | Pendiente | — |
+| `01_WF-01_canvas.png` | WF-01 | Canvas completo de la ingesta RAG | — | 1315 × 523 | Aprobada en conjunto con 01a–01e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle |
 | `02_WF-02_canvas.png` | WF-02 | Canvas completo: chat y webhook, validación previa, respuesta y monitoreo | — | — | Pendiente | — |
 | `03_WF-03_canvas.png` | WF-03 | Panorámica del procesamiento | — | — | Pendiente | — |
 | `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores | — | — | Pendiente | — |
 | `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución exitosa con el AI Agent | Prueba 14 A | — | Pendiente | — |
 | `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | Pendiente | — |
+
+## A1. Detalle de WF-01
+
+Complementan la panorámica `01_WF-01_canvas.png`; se aprueban en conjunto con ella.
+
+| Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
+|---|---|---|---|---|---|---|
+| `01a_WF-01_nota_ingesta.png` | WF-01 | Sticky Note "WF-01 Ingesta documental RAG": objetivo, entrada con n8n User Auth y rechazo de procedimientos existentes | — | 701 × 552 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `01b_WF-01_nota_control.png` | WF-01 | Sticky Note "Control antes de escribir" | — | 743 × 527 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `01c_WF-01_nota_vectorizacion.png` | WF-01 | Sticky Note "Vectorización": fragmentación, `gemini-embedding-001` (3072 dimensiones), tabla y función de Supabase | — | 1049 × 559 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `01d_WF-01_entrada_validacion.png` | WF-01 | Formulario de carga, lectura de archivos, validación del documento, búsqueda en Supabase y clasificación | — | 1222 × 557 | Aprobada | Nombres de nodos legibles |
+| `01e_WF-01_supabase_embeddings.png` | WF-01 | Supabase Vector Store con Embeddings Google Gemini, Default Data Loader, Recursive Character Text Splitter y Resumen de la ingesta | — | 1333 × 575 | Aprobada | Nombres de nodos y conexiones de subnodos legibles |
+
+**Revisión de las capturas de WF-01:**
+
+- **Integridad:** PNG válidos; huellas SHA-256 idénticas a las del manifiesto de origen.
+- **Metadatos:** sin bloques de texto ni EXIF; solo perfil de color y densidad (96 ppp).
+- **Correspondencia:** los 14 nodos funcionales y las 3 Sticky Notes coinciden con `workflows/WF-01_ingesta_documental_rag.json`.
+- **Privacidad:** sin URL de la instancia, correos, credenciales ni datos de ejecuciones. Se ve el nombre del proyecto ("Personal") y el contador del plan de n8n.
+- **Resolución:** inferior al objetivo de calidad del proyecto (1920 × 1080). Aceptada por el responsable porque los detalles son legibles a tamaño real; la consigna no fija una resolución mínima.
 
 ## B. Detalle de WF-03 y de la ejecución
 
@@ -37,6 +57,7 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 
 ## Estado
 
-- Las 14 capturas están pendientes de incorporación.
-- No se incluyen imágenes de baja resolución, ampliadas ni reconstruidas para completar el inventario.
-- El README enlazará solo las capturas aprobadas.
+- **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
+- **Pendientes:** las otras 13 evidencias previstas, entre ellas los canvas de WF-02, WF-03 y WF-04 y la ejecución exitosa CON-205 que exige la consigna.
+- No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
+- El README enlaza solo las capturas aprobadas.
