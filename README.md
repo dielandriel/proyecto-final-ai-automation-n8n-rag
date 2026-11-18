@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** incorporadas las capturas de WF-01; las de WF-02, WF-03, WF-04 y de la ejecución exitosa están pendientes. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02; las de WF-03, WF-04 y de la ejecución exitosa están pendientes. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -107,7 +107,19 @@ Detalles:
 - [Nota "Control antes de escribir"](capturas/01b_WF-01_nota_control.png)
 - [Nota "Vectorización"](capturas/01c_WF-01_nota_vectorizacion.png)
 
-Las capturas de WF-02, WF-03, WF-04 y de una ejecución exitosa están pendientes ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
+**WF-02 Recepción.** Panorámica del flujo completo; en las capturas `02`, `02d` y `02e` se ocultaron los identificadores internos de los workflows enlazados.
+
+![Canvas de WF-02 Recepción](capturas/02_WF-02_canvas.png)
+
+Detalles:
+
+- [Entradas, validación previa y ruta de la consulta](capturas/02d_WF-02_entradas_validacion.png)
+- [Respuesta final, monitoreo y respuesta por canal](capturas/02e_WF-02_respuesta_monitoreo.png)
+- [Notas "WF-02 Recepción" y "Validación previa (sin IA)"](capturas/02a_WF-02_notas_recepcion_validacion.png)
+- [Nota "Procesamiento"](capturas/02b_WF-02_nota_procesamiento.png)
+- [Nota "Respuesta y monitoreo"](capturas/02c_WF-02_nota_respuesta_monitoreo.png)
+
+Las capturas de WF-03, WF-04 y de una ejecución exitosa están pendientes ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
 
 ### Herramientas utilizadas
 
@@ -528,6 +540,7 @@ datos/
 capturas/
   INDICE_EVIDENCIAS.md   Inventario y estado de las capturas
   01*_WF-01_*.png        Canvas de WF-01 (panorámica y 5 detalles)
+  02*_WF-02_*.png        Canvas de WF-02 (panorámica y 5 detalles)
 ```
 
 ## 14. Correspondencia con la consigna
@@ -543,7 +556,7 @@ capturas/
 | Manejo de errores y casos límite | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01 incorporado ([sección 2](#capturas-del-canvas)); canvas de WF-02, WF-03 y WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01 y WF-02 incorporados ([sección 2](#capturas-del-canvas)); canvas de WF-03 y WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 
