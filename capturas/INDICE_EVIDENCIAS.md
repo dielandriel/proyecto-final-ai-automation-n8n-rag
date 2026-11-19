@@ -61,12 +61,36 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 - **Privacidad:** sin URL de la instancia, correos, credenciales ni datos de ejecuciones.
 - **Resolución:** inferior al objetivo de calidad del proyecto (1920 × 1080). Los detalles son legibles a tamaño real; la consigna no fija una resolución mínima.
 
+## A3. WF-03: AI Agent, herramientas y notas explicativas (lote 1)
+
+Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni los detalles de validación, registro, aviso y configuración RAG, que siguen pendientes.
+
+| Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
+|---|---|---|---|---|---|---|
+| `03b1_WF-03_agente.png` | WF-03 | Grupo "AI Agent con RAG" y nodo "Agente de procesos internos" con sus conectores de modelo, memoria, herramientas y Output Parser, y salidas Success y Error | — | 967 × 527 | Aprobada | Las etiquetas de los conectores aparecen recortadas por la interfaz de n8n; los subnodos se identifican en `03b2` |
+| `03b2_WF-03_herramientas.png` | WF-03 | Subnodos del agente: Google Gemini Chat Model, `buscar_procedimientos` con Embeddings Google Gemini, `consultar_mis_solicitudes` y Salida estructurada | — | 1032 × 535 | Aprobada | Nombres de nodos y tipos de conexión legibles |
+| `03n1_WF-03_nota_general.png` | WF-03 | Sticky Note "WF-03 Procesamiento": función del subworkflow y límites del modelo | — | 777 × 543 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `03n2_WF-03_nota_controles.png` | WF-03 | Sticky Note "Controles previos al agente (sin IA)" | — | 814 × 504 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `03n3_WF-03_nota_agente_rag.png` | WF-03 | Sticky Note "AI Agent con RAG": modelo, herramientas, decisiones y validación | — | 1037 × 535 | Aprobada | Texto idéntico a la nota del JSON exportado |
+| `03n4_WF-03_nota_registro.png` | WF-03 | Sticky Note "Registro en Consultas" | — | 1158 × 512 | Aprobada | Texto idéntico a la nota del JSON exportado. En el borde inferior derecho se ve parcialmente un ícono flotante del escritorio, ajeno a n8n, sin información |
+| `03n5_WF-03_nota_aviso.png` | WF-03 | Sticky Note "Aviso de derivación por Gmail": condiciones del aviso y envío deshabilitado en la entrega | — | 1110 × 534 | Aprobada | Texto idéntico a la nota del JSON exportado. Mismo ícono flotante, apenas visible en el borde |
+| `03n6_WF-03_nota_respuesta.png` | WF-03 | Sticky Note "Respuesta a WF-02" y credenciales a reconfigurar | — | 794 × 522 | Aprobada | Texto idéntico a la nota del JSON exportado |
+
+**Revisión del lote 1 de WF-03:**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen.
+- **Metadatos:** sin bloques de texto ni EXIF; solo perfil de color y densidad.
+- **Correspondencia:** las seis Sticky Notes coinciden textualmente con `workflows/WF-03_procesamiento.json`, y los nombres del agente y sus cinco subnodos existen en el export.
+- **Ediciones:** ninguna declarada ni detectada.
+- **Privacidad:** sin URL de la instancia, correos, credenciales, identificadores ni datos de ejecuciones.
+- **Resolución:** inferior al objetivo de calidad del proyecto (1920 × 1080). Legibles a tamaño real; la consigna no fija una resolución mínima.
+
 ## B. Detalle de WF-03 y de la ejecución
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
 |---|---|---|---|---|---|---|
 | `03a_WF-03_controles_previos.png` | WF-03 | Validación del legajo y control de acceso, sin IA | — | — | Pendiente | — |
-| `03b_WF-03_ai_agent_herramientas.png` | WF-03 | AI Agent, Gemini, `buscar_procedimientos` con embeddings, `consultar_mis_solicitudes` y Structured Output Parser | — | — | Pendiente | — |
+| `03b_WF-03_ai_agent_herramientas.png` | WF-03 | AI Agent, Gemini, `buscar_procedimientos` con embeddings, `consultar_mis_solicitudes` y Structured Output Parser | — | — | Cubierta por `03b1` y `03b2` (sección A3) | No se generará un archivo con este nombre |
 | `03c_WF-03_registro_consultas.png` | WF-03 | Registro en Google Sheets sin duplicados | — | — | Pendiente | — |
 | `03d_WF-03_aviso_derivacion.png` | WF-03 | Aviso de derivación por Gmail y `estado_aviso` | — | — | Pendiente | — |
 | `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Pendiente | — |
@@ -83,6 +107,8 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **Pendientes:** las demás evidencias previstas, entre ellas los canvas de WF-03 y WF-04 y la ejecución exitosa CON-205 que exige la consigna.
+- **WF-03 (parcial):** 8 capturas aprobadas del lote 1 (agente, herramientas y seis notas explicativas).
+- **Pendientes de WF-03:** panorámica `03`, controles previos `03a`, registro `03c`, aviso `03d` y configuración RAG `03e`.
+- **Otras pendientes:** canvas de WF-04, ejecución exitosa CON-205 (`05`, `05a`), registro en Sheets (`06`) y complementarias (`07`, `08`).
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
