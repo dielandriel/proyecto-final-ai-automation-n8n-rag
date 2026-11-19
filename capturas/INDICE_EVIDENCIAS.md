@@ -63,7 +63,7 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 
 ## A3. WF-03: AI Agent, herramientas y notas explicativas (lote 1)
 
-Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni los detalles de aviso y configuración RAG, que siguen pendientes. La validación y el registro se documentan en la sección B (lote 2).
+Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni la configuración RAG, que siguen pendientes. La validación y el registro (lote 2) y el aviso de derivación (lote 3) se documentan en la sección B.
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
 |---|---|---|---|---|---|---|
@@ -94,7 +94,9 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 | `03c_WF-03_registro_consultas.png` | WF-03 | Registro en Google Sheets sin duplicados | — | — | Cubierta por `03c1` y `03c2` | No se generará un archivo con este nombre |
 | `03c1_WF-03_registro_preparacion_y_control.png` | WF-03 | Grupo "Registro en Consultas": Preparar registro, Buscar consulta registrada, Decidir inserción y Consulta nueva (control de duplicados) | — | 1105 × 535 | Aprobada (lote 2) | "Registrar consulta" aparece en el borde; se ve completo en `03c2` |
 | `03c2_WF-03_registro_confirmacion.png` | WF-03 | Bifurcación de Consulta nueva: Registrar consulta (append), Confirmar registro y Resultado del registro; la rama false omite la escritura | — | 979 × 528 | Aprobada (lote 2) | Complementa `03c1` |
-| `03d_WF-03_aviso_derivacion.png` | WF-03 | Aviso de derivación por Gmail y `estado_aviso` | — | — | Pendiente | — |
+| `03d_WF-03_aviso_derivacion.png` | WF-03 | Panorámica del grupo "Aviso de derivación" completo: nueve nodos y sus conexiones | — | 1094 × 534 | Aprobada en conjunto con 03d1 y 03d2 (lote 3) | Muestra la estructura; las etiquetas pequeñas se leen en los detalles. No acredita por sí sola el estado de Gmail: el envío deshabilitado y los destinatarios vacíos constan en el JSON y en la documentación |
+| `03d1_WF-03_preparacion_aviso.png` | WF-03 | Detalle izquierdo: Configuración del aviso, Preparar aviso, Enviar aviso (true/false), Enviar correo de aviso (`send: message`), Resultado del aviso, Registrar estado del aviso y Actualizar estado del aviso | — | 1018 × 521 | Aprobada en conjunto (lote 3) | Cobertura parcial del grupo: el sector derecho continúa en `03d2` |
+| `03d2_WF-03_confirmacion_aviso.png` | WF-03 | Detalle derecho: Resultado del aviso, Registrar estado del aviso (true/false), Actualizar estado del aviso (`update: sheet`), Confirmar estado del aviso y Respuesta final | — | 914 × 511 | Aprobada en conjunto (lote 3) | Cobertura parcial del grupo: el sector izquierdo está en `03d1` |
 | `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Pendiente | — |
 | `05a_ejecucion_CON-205_validar_decision.png` | WF-03 | Decisión RESPONDER, respuesta con citas, fuentes y fragmentos recuperados | Prueba 14 A | — | Pendiente | Puede dividirse en `05a` y `05b` |
 
@@ -107,6 +109,16 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 - **Privacidad:** sin URL de la instancia, correos, credenciales, identificadores ni datos de ejecuciones. En `03a` y `03c1` se ve parcialmente, en el borde inferior derecho, el mismo ícono flotante del escritorio ajeno a n8n.
 - **Resolución:** de 979 × 528 a 1111 × 503; nombres de nodos legibles a tamaño real.
 
+**Revisión del lote 3 de WF-03 (`03d`, `03d1`, `03d2`):**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen.
+- **Metadatos:** sin bloques de texto ni EXIF; solo perfil de color y densidad.
+- **Correspondencia:** los nueve nodos del grupo "Aviso de derivación" y sus conexiones, incluidas las ramas true y false de "Enviar aviso" y "Registrar estado del aviso", coinciden con `workflows/WF-03_procesamiento.json`.
+- **Cobertura:** la panorámica muestra el grupo completo; cada detalle cubre una parte. El aviso queda documentado por el conjunto de las tres imágenes.
+- **Ediciones:** ninguna declarada ni detectada.
+- **Privacidad:** sin destinatarios de correo, URL de la instancia, credenciales ni datos de ejecuciones. No se abrió la configuración de los nodos del aviso.
+- **Resolución:** de 914 × 511 a 1094 × 534; nombres de nodos legibles en los detalles.
+
 ## C. Complementarias
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
@@ -118,8 +130,11 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03 (parcial):** 11 capturas aprobadas. Lote 1: agente, herramientas y seis notas. Lote 2: validación `03a` y registro `03c1` y `03c2`.
-- **Pendientes de WF-03:** panorámica `03`, aviso de derivación `03d` y configuración RAG `03e`.
+- **WF-03 (parcial):** 14 capturas aprobadas.
+  - Lote 1: agente, herramientas y seis notas.
+  - Lote 2: validación `03a` y registro `03c1` y `03c2`.
+  - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
+- **Pendientes de WF-03:** panorámica general `03` y configuración RAG `03e`.
 - **Otras pendientes:** canvas de WF-04, ejecución exitosa CON-205 (`05`, `05a`), registro en Sheets (`06`) y complementarias (`07`, `08`).
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
