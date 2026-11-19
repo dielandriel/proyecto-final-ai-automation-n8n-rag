@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y un primer lote parcial de WF-03 (AI Agent, herramientas y notas). Están pendientes la panorámica y otros detalles de WF-03, el canvas de WF-04 y la ejecución exitosa. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y capturas parciales de WF-03 (AI Agent, herramientas, notas, validación y registro). Están pendientes la panorámica, el aviso de derivación y la configuración RAG de WF-03, el canvas de WF-04 y la ejecución exitosa. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -119,7 +119,7 @@ Detalles:
 - [Nota "Procesamiento"](capturas/02b_WF-02_nota_procesamiento.png)
 - [Nota "Respuesta y monitoreo"](capturas/02c_WF-02_nota_respuesta_monitoreo.png)
 
-**WF-03 Procesamiento (parcial).** Primer lote: el AI Agent con sus herramientas y las seis notas explicativas. La panorámica y los detalles de validación, registro, aviso y configuración RAG están pendientes.
+**WF-03 Procesamiento (parcial).** Incorporados el AI Agent con sus herramientas, las seis notas explicativas, la validación del empleado y el registro en Consultas. La panorámica, el aviso de derivación y la configuración RAG están pendientes.
 
 ![Subnodos del AI Agent de WF-03: modelo, herramientas y salida estructurada](capturas/03b2_WF-03_herramientas.png)
 
@@ -127,6 +127,12 @@ Agente y herramientas:
 
 - [Grupo "AI Agent con RAG" y nodo del agente](capturas/03b1_WF-03_agente.png)
 - [Gemini, `buscar_procedimientos` con embeddings, `consultar_mis_solicitudes` y salida estructurada](capturas/03b2_WF-03_herramientas.png)
+
+Validación y registro:
+
+- [Validación del empleado (controles sin IA)](capturas/03a_WF-03_validacion_empleado.png)
+- [Registro en Consultas: preparación y control de duplicados](capturas/03c1_WF-03_registro_preparacion_y_control.png)
+- [Registro en Consultas: escritura y confirmación](capturas/03c2_WF-03_registro_confirmacion.png)
 
 Notas explicativas:
 
@@ -137,7 +143,7 @@ Notas explicativas:
 - [Nota "Aviso de derivación por Gmail"](capturas/03n5_WF-03_nota_aviso.png)
 - [Nota "Respuesta a WF-02"](capturas/03n6_WF-03_nota_respuesta.png)
 
-Están pendientes la panorámica y los detalles restantes de WF-03, el canvas de WF-04 y las capturas de una ejecución exitosa ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
+Están pendientes la panorámica, el aviso de derivación y la configuración RAG de WF-03, el canvas de WF-04 y las capturas de una ejecución exitosa ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
 
 ### Herramientas utilizadas
 
@@ -561,7 +567,7 @@ capturas/
   INDICE_EVIDENCIAS.md   Inventario y estado de las capturas
   01*_WF-01_*.png        Canvas de WF-01 (panorámica y 5 detalles)
   02*_WF-02_*.png        Canvas de WF-02 (panorámica y 5 detalles)
-  03*_WF-03_*.png        WF-03, lote parcial: agente, herramientas y 6 notas
+  03*_WF-03_*.png        WF-03, parcial: agente, herramientas, 6 notas, validación y registro
 ```
 
 ## 14. Correspondencia con la consigna
@@ -577,7 +583,7 @@ capturas/
 | Manejo de errores y casos límite | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01 y WF-02 incorporados y lote parcial de WF-03 ([sección 2](#capturas-del-canvas)); panorámica y detalles restantes de WF-03, canvas de WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01 y WF-02 incorporados y capturas parciales de WF-03 ([sección 2](#capturas-del-canvas)); panorámica, aviso y configuración RAG de WF-03, canvas de WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 

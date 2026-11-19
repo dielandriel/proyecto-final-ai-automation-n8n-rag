@@ -63,7 +63,7 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 
 ## A3. WF-03: AI Agent, herramientas y notas explicativas (lote 1)
 
-Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni los detalles de validación, registro, aviso y configuración RAG, que siguen pendientes.
+Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni los detalles de aviso y configuración RAG, que siguen pendientes. La validación y el registro se documentan en la sección B (lote 2).
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
 |---|---|---|---|---|---|---|
@@ -89,12 +89,23 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
 |---|---|---|---|---|---|---|
-| `03a_WF-03_controles_previos.png` | WF-03 | Validación del legajo y control de acceso, sin IA | — | — | Pendiente | — |
+| `03a_WF-03_validacion_empleado.png` | WF-03 | Grupo "Validación del empleado": Buscar empleado, Validar empleado y Empleado habilitado (salidas true y false), seguido de Leer solicitudes propias; controles sin IA | — | 1111 × 503 | Aprobada (lote 2) | Reemplaza el nombre previsto `03a_WF-03_controles_previos.png`. La descripción del grupo aparece truncada por la interfaz; el texto completo está en el JSON |
 | `03b_WF-03_ai_agent_herramientas.png` | WF-03 | AI Agent, Gemini, `buscar_procedimientos` con embeddings, `consultar_mis_solicitudes` y Structured Output Parser | — | — | Cubierta por `03b1` y `03b2` (sección A3) | No se generará un archivo con este nombre |
-| `03c_WF-03_registro_consultas.png` | WF-03 | Registro en Google Sheets sin duplicados | — | — | Pendiente | — |
+| `03c_WF-03_registro_consultas.png` | WF-03 | Registro en Google Sheets sin duplicados | — | — | Cubierta por `03c1` y `03c2` | No se generará un archivo con este nombre |
+| `03c1_WF-03_registro_preparacion_y_control.png` | WF-03 | Grupo "Registro en Consultas": Preparar registro, Buscar consulta registrada, Decidir inserción y Consulta nueva (control de duplicados) | — | 1105 × 535 | Aprobada (lote 2) | "Registrar consulta" aparece en el borde; se ve completo en `03c2` |
+| `03c2_WF-03_registro_confirmacion.png` | WF-03 | Bifurcación de Consulta nueva: Registrar consulta (append), Confirmar registro y Resultado del registro; la rama false omite la escritura | — | 979 × 528 | Aprobada (lote 2) | Complementa `03c1` |
 | `03d_WF-03_aviso_derivacion.png` | WF-03 | Aviso de derivación por Gmail y `estado_aviso` | — | — | Pendiente | — |
 | `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Pendiente | — |
 | `05a_ejecucion_CON-205_validar_decision.png` | WF-03 | Decisión RESPONDER, respuesta con citas, fuentes y fragmentos recuperados | Prueba 14 A | — | Pendiente | Puede dividirse en `05a` y `05b` |
+
+**Revisión del lote 2 de WF-03 (`03a`, `03c1`, `03c2`):**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen.
+- **Metadatos:** sin bloques de texto ni EXIF; solo perfil de color y densidad.
+- **Correspondencia:** los 11 nodos visibles, los nombres y descripciones de los grupos "Validación del empleado" y "Registro en Consultas" y las conexiones mostradas (incluidas las ramas true y false) coinciden con `workflows/WF-03_procesamiento.json`.
+- **Ediciones:** ninguna declarada ni detectada.
+- **Privacidad:** sin URL de la instancia, correos, credenciales, identificadores ni datos de ejecuciones. En `03a` y `03c1` se ve parcialmente, en el borde inferior derecho, el mismo ícono flotante del escritorio ajeno a n8n.
+- **Resolución:** de 979 × 528 a 1111 × 503; nombres de nodos legibles a tamaño real.
 
 ## C. Complementarias
 
@@ -107,8 +118,8 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03 (parcial):** 8 capturas aprobadas del lote 1 (agente, herramientas y seis notas explicativas).
-- **Pendientes de WF-03:** panorámica `03`, controles previos `03a`, registro `03c`, aviso `03d` y configuración RAG `03e`.
+- **WF-03 (parcial):** 11 capturas aprobadas. Lote 1: agente, herramientas y seis notas. Lote 2: validación `03a` y registro `03c1` y `03c2`.
+- **Pendientes de WF-03:** panorámica `03`, aviso de derivación `03d` y configuración RAG `03e`.
 - **Otras pendientes:** canvas de WF-04, ejecución exitosa CON-205 (`05`, `05a`), registro en Sheets (`06`) y complementarias (`07`, `08`).
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
