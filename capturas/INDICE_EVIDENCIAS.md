@@ -15,7 +15,22 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 | `03_WF-03_canvas.png` | WF-03 | Panorámica de WF-03: seis notas, grupos de validación, AI Agent con RAG, registro y aviso, y sus conexiones | — | 1158 × 515 | Aprobada como panorámica contextual (lote 4) | Solo muestra la estructura general: los nombres de nodos no son legibles a este tamaño y se leen en los detalles publicados (`03a`, `03b1`, `03b2`, `03c1`, `03c2`, `03d`, `03d1`, `03d2`, `03n1` a `03n6`). En el borde inferior derecho se ve un ícono flotante del escritorio ajeno a n8n |
 | `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores: cuatro Sticky Notes, dos entradas y recorrido hasta el resultado | — | 1160 × 533 | Aprobada como panorámica contextual, en conjunto con 04a, 04b1 y 04b2 (lote 1) | Las cuatro notas se ven, pero su texto **no es legible** a esta escala. Los nombres de nodos se leen en los detalles |
 | `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución histórica 206 de WF-03 en la vista Executions: Succeeded en 8,863 s, 16/11 19:33:32, recorrido del canvas | Prueba 14 A | 1163 × 532 | Aprobada (lote CON-205 1) | La imagen muestra el número de ejecución, no el id de consulta: el vínculo con CON-205 lo acreditan `05a` y el registro de pruebas. Los nombres de nodos no son legibles a esta escala |
-| `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | **Pendiente** | La fila CON-205 todavía no se verificó visualmente en Google Sheets |
+| `06_sheets_consultas_CON-205.png` | Google Sheets | Pestaña Consultas de BASE_DATOS_PROYECTO_FINAL, fila 14 seleccionada (A14 = CON-205): CHAT, LEG-0007, PRO-RH-001, Informativa, RESPONDER, COMPLETADO, sin código de error, urgencia Normal | Prueba 14 A | 1352 × 252 | Aprobada en conjunto con 06b (lote CON-205 2) | **Edición de privacidad:** avatar de la cuenta cubierto con un relleno opaco del color del fondo (x 1303–1348, y 7–49). Algunas columnas (`fecha_hora`, `resumen`) aparecen truncadas por su ancho |
+| `06b_sheets_consultas_CON-205_estado_aviso.png` | Google Sheets | Continuación de la misma fila 14 (columnas D a Q; A14 = CON-205 en la barra de fórmulas): fuentes `PRO-RH-001 §7; PRO-RH-001 §13`, sin `id_solicitud` ni `estado_derivacion`, `estado_aviso` NO_APLICA | Prueba 14 A | 1360 × 530 | Aprobada en conjunto con 06 (lote CON-205 2) | **Edición de privacidad:** la misma que en `06`. Las demás filas visibles son registros ficticios de otras pruebas |
+
+**Revisión del lote 2 de CON-205 (`06`, `06b`):**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen. Ninguna coincide con imágenes ya publicadas.
+- **Metadatos:** sin bloques de texto, EXIF ni perfiles.
+- **Misma fila:** ambas muestran la fila 14 de la pestaña Consultas, seleccionada, con A14 = CON-205 en la barra de fórmulas.
+- **Correspondencia con la ejecución 206** (`05a`, `05b1`), sin discrepancias:
+  - `id_consulta`, `origen`, `legajo`, `procedimiento`, `categoria` y `decision`.
+  - `estado_procesamiento`, `codigo_error`, `area_destino` y `urgencia`.
+  - `fuentes` e `id_solicitud`.
+- **Coincidencia con el registro de pruebas:** `estado_aviso` NO_APLICA, como en la Prueba 14 A.
+- **Edición de privacidad:** solo el avatar de la cuenta. Se verificó que la zona superior derecha (desde x 1290, y 0–60) es un color uniforme en ambas imágenes, sin restos de la fotografía. No se alteraron celdas, valores ni encabezados.
+- **Privacidad:** sin correos, URL ni identificadores de la planilla. Los datos visibles son ficticios.
+- **Conjunto:** `06` identifica la fila y sus primeras columnas; `06b` muestra la continuación hasta `estado_aviso`. Juntas prueban el registro de CON-205 con decisión RESPONDER, procedimiento PRO-RH-001, estado COMPLETADO y `estado_aviso` NO_APLICA.
 
 ## A1. Detalle de WF-01
 
@@ -202,8 +217,8 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
   - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
   - Lote 4: panorámica contextual `03`.
   - Lote 5: configuración RAG `03e1` y `03e2`.
-- **Pendiente:** fila CON-205 en Google Sheets (`06`), aún no verificada visualmente.
+- **Registro de CON-205 en Google Sheets:** 2 capturas aprobadas en conjunto (`06`, `06b`).
 - **WF-04:** 4 capturas aprobadas en conjunto (panorámica `04` y detalles `04a`, `04b1` y `04b2`), con las limitaciones de legibilidad indicadas en la sección A4.
-- **Otras pendientes:** complementarias (`07`, `08`). Opcionales: capturas legibles de las notas de WF-04 y una toma completa de Evitar duplicados.
+- **Pendientes de decisión:** complementarias (`07`, `08`). Opcionales: capturas legibles de las notas de WF-04 y una toma completa de Evitar duplicados.
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
