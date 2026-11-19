@@ -12,7 +12,7 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 |---|---|---|---|---|---|---|
 | `01_WF-01_canvas.png` | WF-01 | Canvas completo de la ingesta RAG | — | 1315 × 523 | Aprobada en conjunto con 01a–01e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle |
 | `02_WF-02_canvas.png` | WF-02 | Canvas completo: chat y webhook, validación previa, respuesta y monitoreo | — | 1162 × 519 | Aprobada en conjunto con 02a–02e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle. Identificadores de WF-03 y WF-04 ocultos |
-| `03_WF-03_canvas.png` | WF-03 | Panorámica del procesamiento | — | — | Pendiente | — |
+| `03_WF-03_canvas.png` | WF-03 | Panorámica de WF-03: seis notas, grupos de validación, AI Agent con RAG, registro y aviso, y sus conexiones | — | 1158 × 515 | Aprobada como panorámica contextual (lote 4) | Solo muestra la estructura general: los nombres de nodos no son legibles a este tamaño y se leen en los detalles publicados (`03a`, `03b1`, `03b2`, `03c1`, `03c2`, `03d`, `03d1`, `03d2`, `03n1` a `03n6`). En el borde inferior derecho se ve un ícono flotante del escritorio ajeno a n8n |
 | `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores | — | — | Pendiente | — |
 | `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución exitosa con el AI Agent | Prueba 14 A | — | Pendiente | — |
 | `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | Pendiente | — |
@@ -63,7 +63,7 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 
 ## A3. WF-03: AI Agent, herramientas y notas explicativas (lote 1)
 
-Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png` ni la configuración RAG, que siguen pendientes. La validación y el registro (lote 2) y el aviso de derivación (lote 3) se documentan en la sección B.
+Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_canvas.png` (lote 4). La configuración RAG sigue pendiente. La validación y el registro (lote 2) y el aviso de derivación (lote 3) se documentan en la sección B.
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
 |---|---|---|---|---|---|---|
@@ -119,6 +119,16 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 - **Privacidad:** sin destinatarios de correo, URL de la instancia, credenciales ni datos de ejecuciones. No se abrió la configuración de los nodos del aviso.
 - **Resolución:** de 914 × 511 a 1094 × 534; nombres de nodos legibles en los detalles.
 
+**Revisión del lote 4 de WF-03 (`03`):**
+
+- **Archivos recibidos:** cuatro. `03d`, `03d1` y `03d2` tienen la misma huella SHA-256 que las ya publicadas en el lote 3, por lo que no se volvieron a subir. Solo se incorporó la panorámica `03`.
+- **Integridad:** PNG válido, sin errores de CRC; dimensiones y huella idénticas a las del manifiesto.
+- **Metadatos:** sin bloques de texto ni EXIF.
+- **Correspondencia:** se distinguen las seis Sticky Notes y los cuatro grupos de `workflows/WF-03_procesamiento.json` (validación del empleado, AI Agent con RAG, registro en Consultas y aviso de derivación), en la disposición del canvas.
+- **Ediciones:** ninguna.
+- **Privacidad:** sin URL, correos, credenciales ni datos de ejecuciones.
+- **Uso:** panorámica contextual; no se usa como evidencia de nombres o parámetros.
+
 ## C. Complementarias
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
@@ -130,11 +140,12 @@ Evidencias parciales de WF-03. No sustituyen la panorámica `03_WF-03_canvas.png
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03 (parcial):** 14 capturas aprobadas.
+- **WF-03 (parcial):** 15 capturas aprobadas.
   - Lote 1: agente, herramientas y seis notas.
   - Lote 2: validación `03a` y registro `03c1` y `03c2`.
   - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
-- **Pendientes de WF-03:** panorámica general `03` y configuración RAG `03e`.
+  - Lote 4: panorámica contextual `03`.
+- **Pendientes de WF-03:** configuración RAG `03e` y evidencias de la ejecución exitosa.
 - **Otras pendientes:** canvas de WF-04, ejecución exitosa CON-205 (`05`, `05a`), registro en Sheets (`06`) y complementarias (`07`, `08`).
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
