@@ -63,7 +63,7 @@ Complementan la panorámica `02_WF-02_canvas.png`; se aprueban en conjunto con e
 
 ## A3. WF-03: AI Agent, herramientas y notas explicativas (lote 1)
 
-Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_canvas.png` (lote 4). La configuración RAG sigue pendiente. La validación y el registro (lote 2) y el aviso de derivación (lote 3) se documentan en la sección B.
+Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_canvas.png` (lote 4). La configuración RAG se documenta en la sección B (lote 5). La validación y el registro (lote 2) y el aviso de derivación (lote 3) se documentan en la sección B.
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
 |---|---|---|---|---|---|---|
@@ -97,7 +97,9 @@ Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_
 | `03d_WF-03_aviso_derivacion.png` | WF-03 | Panorámica del grupo "Aviso de derivación" completo: nueve nodos y sus conexiones | — | 1094 × 534 | Aprobada en conjunto con 03d1 y 03d2 (lote 3) | Muestra la estructura; las etiquetas pequeñas se leen en los detalles. No acredita por sí sola el estado de Gmail: el envío deshabilitado y los destinatarios vacíos constan en el JSON y en la documentación |
 | `03d1_WF-03_preparacion_aviso.png` | WF-03 | Detalle izquierdo: Configuración del aviso, Preparar aviso, Enviar aviso (true/false), Enviar correo de aviso (`send: message`), Resultado del aviso, Registrar estado del aviso y Actualizar estado del aviso | — | 1018 × 521 | Aprobada en conjunto (lote 3) | Cobertura parcial del grupo: el sector derecho continúa en `03d2` |
 | `03d2_WF-03_confirmacion_aviso.png` | WF-03 | Detalle derecho: Resultado del aviso, Registrar estado del aviso (true/false), Actualizar estado del aviso (`update: sheet`), Confirmar estado del aviso y Respuesta final | — | 914 × 511 | Aprobada en conjunto (lote 3) | Cobertura parcial del grupo: el sector izquierdo está en `03d1` |
-| `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Pendiente | — |
+| `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Cubierta por `03e1` y `03e2` (lote 5) | No se generará un archivo con este nombre |
+| `03e1_WF-03_rag_operacion_y_tabla.png` | WF-03 / Supabase | Panel Parameters de `buscar_procedimientos`: modo "Retrieve Documents (As Tool for AI Agent)", credencial referenciada, descripción de la herramienta y tabla `documents` | — | 1084 × 509 | Aprobada en conjunto con 03e2 (lote 5) | La credencial figura con su nombre en la instancia ("Supabase account"); el JSON entregado usa el nombre genérico "Supabase API". No se muestra ningún secreto |
+| `03e2_WF-03_rag_parametros_busqueda.png` | WF-03 / Supabase | Tabla `documents`, Limit 5, Include Metadata activo, Rerank Results desactivado y Query Name `match_documents` | — | 1079 × 488 | Aprobada en conjunto con 03e1 (lote 5) | Documenta configuración, no una ejecución RAG |
 | `05a_ejecucion_CON-205_validar_decision.png` | WF-03 | Decisión RESPONDER, respuesta con citas, fuentes y fragmentos recuperados | Prueba 14 A | — | Pendiente | Puede dividirse en `05a` y `05b` |
 
 **Revisión del lote 2 de WF-03 (`03a`, `03c1`, `03c2`):**
@@ -129,6 +131,21 @@ Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_
 - **Privacidad:** sin URL, correos, credenciales ni datos de ejecuciones.
 - **Uso:** panorámica contextual; no se usa como evidencia de nombres o parámetros.
 
+**Revisión del lote 5 de WF-03 (`03e1`, `03e2`):**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen.
+- **Metadatos:** sin bloques de texto ni EXIF.
+- **Correspondencia con `workflows/WF-03_procesamiento.json`** (nodo `buscar_procedimientos`, Supabase Vector Store 1.4):
+  - Modo `retrieve-as-tool`, tabla `documents`, `topK` 5 y `queryName` `match_documents`.
+  - Include Metadata y Rerank Results con sus valores por defecto (activo y desactivado).
+  - La descripción visible coincide con `toolDescription`.
+- **Ediciones:** ninguna.
+- **Privacidad:**
+  - Sin tokens, contraseñas, URL ni correos.
+  - El panel de entrada muestra solo nombres de campos (esquema), sin valores.
+  - El nombre visible de la credencial no revela el secreto.
+- **Alcance:** documentan la configuración, no una ejecución RAG exitosa, que sigue pendiente como evidencia independiente (CON-205).
+
 ## C. Complementarias
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
@@ -140,12 +157,13 @@ Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03 (parcial):** 15 capturas aprobadas.
+- **WF-03:** 17 capturas aprobadas. La documentación visual de la configuración está completa; la ejecución exitosa sigue pendiente.
   - Lote 1: agente, herramientas y seis notas.
   - Lote 2: validación `03a` y registro `03c1` y `03c2`.
   - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
   - Lote 4: panorámica contextual `03`.
-- **Pendientes de WF-03:** configuración RAG `03e` y evidencias de la ejecución exitosa.
-- **Otras pendientes:** canvas de WF-04, ejecución exitosa CON-205 (`05`, `05a`), registro en Sheets (`06`) y complementarias (`07`, `08`).
+  - Lote 5: configuración RAG `03e1` y `03e2`.
+- **Pendiente de WF-03:** evidencias de la ejecución exitosa CON-205 (`05`, `05a`) y su registro en Sheets (`06`).
+- **Otras pendientes:** canvas de WF-04 y complementarias (`07`, `08`).
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
