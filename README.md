@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y la configuración de WF-03 (panorámica, AI Agent, herramientas, notas, validación, registro, aviso y configuración RAG). Están pendientes el canvas de WF-04 y la ejecución exitosa. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y la configuración de WF-03 (panorámica, AI Agent, herramientas, notas, validación, registro, aviso y configuración RAG). También el canvas de WF-04, con limitaciones de legibilidad. Están pendientes la ejecución exitosa CON-205 y su registro en Google Sheets. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -160,7 +160,17 @@ Configuración RAG de `buscar_procedimientos` (Supabase Vector Store como herram
 - [Modo de operación, credencial y tabla `documents`](capturas/03e1_WF-03_rag_operacion_y_tabla.png)
 - [Límite de 5 fragmentos, metadatos y función `match_documents`](capturas/03e2_WF-03_rag_parametros_busqueda.png)
 
-Están pendientes el canvas de WF-04 y las capturas de una ejecución exitosa ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
+**WF-04 Monitoreo de errores.** Panorámica contextual: se ven las cuatro notas y el recorrido completo, pero el texto de las notas no es legible a esta escala (consta en el JSON exportado). Los nombres de los nodos se leen en los detalles.
+
+![Canvas de WF-04 Monitoreo de errores (panorámica contextual)](capturas/04_WF-04_canvas.png)
+
+Detalles:
+
+- [Entradas, normalización y clasificación](capturas/04a_WF-04_recepcion_clasificacion.png)
+- [Deduplicación y preparación de la alerta](capturas/04b1_WF-04_deduplicacion_preparacion.png) (el nodo Evitar duplicados aparece recortado en el borde izquierdo)
+- [Envío de la alerta y resultado del monitoreo](capturas/04b2_WF-04_envio_resultado.png)
+
+Están pendientes las capturas de una ejecución exitosa ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
 
 ### Herramientas utilizadas
 
@@ -467,6 +477,8 @@ Registro de los errores en Consultas:
 
 Bloqueos de privacidad, legajos inválidos y consultas rechazadas no generan alerta.
 
+En el canvas: [panorámica](capturas/04_WF-04_canvas.png), [recepción y clasificación](capturas/04a_WF-04_recepcion_clasificacion.png), [deduplicación](capturas/04b1_WF-04_deduplicacion_preparacion.png) y [alerta](capturas/04b2_WF-04_envio_resultado.png).
+
 ## 9. Pruebas
 
 Se realizaron y aprobaron 15 pruebas, más la Prueba 15 bis, con datos ficticios. Cubren:
@@ -587,6 +599,7 @@ capturas/
   01*_WF-01_*.png        Canvas de WF-01 (panorámica y 5 detalles)
   02*_WF-02_*.png        Canvas de WF-02 (panorámica y 5 detalles)
   03*_WF-03_*.png        WF-03: panorámica, agente, herramientas, 6 notas, validación, registro, aviso y RAG
+  04*_WF-04_*.png        Canvas de WF-04 (panorámica y 3 detalles)
 ```
 
 ## 14. Correspondencia con la consigna
@@ -602,7 +615,7 @@ capturas/
 | Manejo de errores y casos límite | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de WF-01, WF-02 y WF-03 incorporados ([sección 2](#capturas-del-canvas)); canvas de WF-04 y ejecución exitosa pendientes. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de los cuatro workflows incorporados ([sección 2](#capturas-del-canvas)); en WF-04, con limitaciones de legibilidad. Ejecución exitosa pendiente. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 

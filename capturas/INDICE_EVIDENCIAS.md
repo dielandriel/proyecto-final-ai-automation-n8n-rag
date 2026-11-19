@@ -13,7 +13,7 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 | `01_WF-01_canvas.png` | WF-01 | Canvas completo de la ingesta RAG | — | 1315 × 523 | Aprobada en conjunto con 01a–01e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle |
 | `02_WF-02_canvas.png` | WF-02 | Canvas completo: chat y webhook, validación previa, respuesta y monitoreo | — | 1162 × 519 | Aprobada en conjunto con 02a–02e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle. Identificadores de WF-03 y WF-04 ocultos |
 | `03_WF-03_canvas.png` | WF-03 | Panorámica de WF-03: seis notas, grupos de validación, AI Agent con RAG, registro y aviso, y sus conexiones | — | 1158 × 515 | Aprobada como panorámica contextual (lote 4) | Solo muestra la estructura general: los nombres de nodos no son legibles a este tamaño y se leen en los detalles publicados (`03a`, `03b1`, `03b2`, `03c1`, `03c2`, `03d`, `03d1`, `03d2`, `03n1` a `03n6`). En el borde inferior derecho se ve un ícono flotante del escritorio ajeno a n8n |
-| `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores | — | — | Pendiente | — |
+| `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores: cuatro Sticky Notes, dos entradas y recorrido hasta el resultado | — | 1160 × 533 | Aprobada como panorámica contextual, en conjunto con 04a, 04b1 y 04b2 (lote 1) | Las cuatro notas se ven, pero su texto **no es legible** a esta escala. Los nombres de nodos se leen en los detalles |
 | `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución exitosa con el AI Agent | Prueba 14 A | — | Pendiente | — |
 | `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | Pendiente | — |
 
@@ -84,6 +84,28 @@ Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_
 - **Ediciones:** ninguna declarada ni detectada.
 - **Privacidad:** sin URL de la instancia, correos, credenciales, identificadores ni datos de ejecuciones.
 - **Resolución:** inferior al objetivo de calidad del proyecto (1920 × 1080). Legibles a tamaño real; la consigna no fija una resolución mínima.
+
+## A4. Detalle de WF-04
+
+Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con ella.
+
+| Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución | Estado | Observaciones |
+|---|---|---|---|---|---|---|
+| `04a_WF-04_recepcion_clasificacion.png` | WF-04 | Entradas Falla no prevista (Error Trigger) e Incidente controlado, sus normalizaciones, Clasificar y validar incidente y Es incidente (true/false) | — | 1002 × 542 | Aprobada (lote 1) | Nombres de nodos legibles |
+| `04b1_WF-04_deduplicacion_preparacion.png` | WF-04 | Evitar duplicados, Incidente nuevo (true/false), Configuración de alerta y Preparar alerta | — | 786 × 529 | Aprobada con limitación (lote 1) | El nodo **Evitar duplicados está parcialmente recortado** en el borde izquierdo: esta imagen sola no lo demuestra completo. Su ubicación se ve en la panorámica |
+| `04b2_WF-04_envio_resultado.png` | WF-04 | Preparar alerta, Enviar alerta (true/false), Enviar alerta por Gmail (`send: message`) y Resultado del monitoreo | — | 823 × 514 | Aprobada (lote 1) | Nombres de nodos legibles |
+
+**Revisión del lote 1 de WF-04:**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen. Ninguna coincide con imágenes ya publicadas.
+- **Metadatos:** sin bloques de texto ni EXIF.
+- **Correspondencia:** los 13 nodos funcionales, las cuatro Sticky Notes y las conexiones (incluidas las ramas true y false de Es incidente, Incidente nuevo y Enviar alerta) coinciden con `workflows/WF-04_monitoreo_errores.json`.
+- **Ediciones:** ninguna.
+- **Privacidad:** sin correos, destinatarios, URL de la instancia ni valores de credenciales. No se abrieron configuraciones.
+- **Limitaciones:**
+  - El texto de las cuatro Sticky Notes no es legible en la panorámica. Su contenido consta en el JSON exportado; para mostrarlo en imágenes harían falta capturas adicionales.
+  - En `04b1`, el nodo Evitar duplicados aparece recortado a la izquierda.
+  - Las capturas no acreditan por sí mismas que el envío de Gmail esté deshabilitado; eso consta en el JSON y en la documentación.
 
 ## B. Detalle de WF-03 y de la ejecución
 
@@ -164,6 +186,7 @@ Evidencias parciales de WF-03. Complementan la panorámica contextual `03_WF-03_
   - Lote 4: panorámica contextual `03`.
   - Lote 5: configuración RAG `03e1` y `03e2`.
 - **Pendiente de WF-03:** evidencias de la ejecución exitosa CON-205 (`05`, `05a`) y su registro en Sheets (`06`).
-- **Otras pendientes:** canvas de WF-04 y complementarias (`07`, `08`).
+- **WF-04:** 4 capturas aprobadas en conjunto (panorámica `04` y detalles `04a`, `04b1` y `04b2`), con las limitaciones de legibilidad indicadas en la sección A4.
+- **Otras pendientes:** complementarias (`07`, `08`). Opcionales: capturas legibles de las notas de WF-04 y una toma completa de Evitar duplicados.
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
 - El README enlaza solo las capturas aprobadas.
