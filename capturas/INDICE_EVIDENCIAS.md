@@ -1,8 +1,8 @@
 # Índice de evidencias
 
-Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
+Capturas auténticas de las interfaces de n8n y Google Sheets.
 
-- **Estados:** Pendiente, Aprobada o Rechazada.
+- **Estados:** Pendiente, Aprobada o Rechazada. Además: "Cubierta por …" (evidencia prevista que se reemplazó por otras capturas) y "No incorporada — complementaria" (evidencia opcional que no se generó).
 - **Criterios de revisión:** integridad, resolución nativa, legibilidad, correspondencia con la prueba, privacidad y autenticidad.
 - **Uso en la entrega:** solo las capturas aprobadas se incluyen en el repositorio y se enlazan desde el README.
 
@@ -183,7 +183,7 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
   - Sin tokens, contraseñas, URL ni correos.
   - El panel de entrada muestra solo nombres de campos (esquema), sin valores.
   - El nombre visible de la credencial no revela el secreto.
-- **Alcance:** documentan la configuración, no una ejecución RAG exitosa, que sigue pendiente como evidencia independiente (CON-205).
+- **Alcance:** documentan la configuración, no una ejecución RAG. La ejecución RAG exitosa se documenta por separado en `05b1` y `05b2` (CON-205).
 
 **Revisión del lote 1 de la ejecución CON-205 (`05`, `05a`, `05b1`, `05b2`):**
 
@@ -203,22 +203,24 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
 |---|---|---|---|---|---|---|
-| `07_supabase_documents.png` | Supabase | 70 fragmentos en la tabla `documents` | Prueba 4 | — | Pendiente | — |
-| `08_WF-01_ejecucion_ingesta.png` | WF-01 | Ingesta de 5 documentos y 70 fragmentos | Prueba 4 | — | Pendiente | — |
+| `07_supabase_documents.png` | Supabase | 70 fragmentos en la tabla `documents` | Prueba 4 | — | No incorporada — complementaria | No la exige la consigna. La existencia de fragmentos vectorizados en `documents` se demuestra con `05b2` (cinco fragmentos de PRO-RH-001 recuperados en la ejecución 206) y la configuración con `03e1` y `03e2`; la carga de los 70 fragmentos consta en el registro de la Prueba 4 |
+| `08_WF-01_ejecucion_ingesta.png` | WF-01 | Ingesta de 5 documentos y 70 fragmentos | Prueba 4 | — | No incorporada — complementaria | No la exige la consigna (la ejecución exitosa requerida es CON-205). La estructura de la ingesta se ve en `01` a `01e`; su ejecución consta en el registro de la Prueba 4 |
 
 ## Estado
 
-- **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
-- **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03:** 17 capturas aprobadas. La documentación visual de la configuración está completa.
-- **Ejecución exitosa CON-205:** 4 capturas aprobadas (`05`, `05a`, `05b1`, `05b2`): ejecución 206 exitosa, decisión RESPONDER y trazabilidad RAG.
-  - Lote 1: agente, herramientas y seis notas.
-  - Lote 2: validación `03a` y registro `03c1` y `03c2`.
-  - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
-  - Lote 4: panorámica contextual `03`.
-  - Lote 5: configuración RAG `03e1` y `03e2`.
-- **Registro de CON-205 en Google Sheets:** 2 capturas aprobadas en conjunto (`06`, `06b`).
-- **WF-04:** 4 capturas aprobadas en conjunto (panorámica `04` y detalles `04a`, `04b1` y `04b2`), con las limitaciones de legibilidad indicadas en la sección A4.
-- **Pendientes de decisión:** complementarias (`07`, `08`). Opcionales: capturas legibles de las notas de WF-04 y una toma completa de Evitar duplicados.
-- No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.
-- El README enlaza solo las capturas aprobadas.
+- **Capturas publicadas y aprobadas:** 39.
+  - **WF-01:** 6 (panorámica `01` y detalles `01a` a `01e`).
+  - **WF-02:** 6 (panorámica `02` y detalles `02a` a `02e`).
+  - **WF-03:** 17; la configuración queda documentada por completo.
+    - Lote 1: agente, herramientas y seis notas.
+    - Lote 2: validación `03a` y registro `03c1` y `03c2`.
+    - Lote 3: aviso de derivación (`03d`, `03d1`, `03d2`).
+    - Lote 4: panorámica contextual `03`.
+    - Lote 5: configuración RAG `03e1` y `03e2`.
+  - **WF-04:** 4 (panorámica `04` y detalles `04a`, `04b1` y `04b2`), con las limitaciones de legibilidad de la sección A4.
+  - **Ejecución exitosa CON-205:** 4 (`05`, `05a`, `05b1`, `05b2`): ejecución 206, decisión RESPONDER y trazabilidad RAG.
+  - **Registro de CON-205 en Google Sheets:** 2 (`06`, `06b`).
+- **No incorporadas — complementarias:** `07` y `08`. Su finalidad queda cubierta por otras evidencias (ver sección C).
+- **Mejoras opcionales, no requeridas:** capturas legibles de las notas de WF-04 (su texto consta en el JSON) y una toma completa del nodo Evitar duplicados.
+- No se incluyen imágenes ampliadas ni reconstruidas.
+- El README enlaza las 39 capturas publicadas.

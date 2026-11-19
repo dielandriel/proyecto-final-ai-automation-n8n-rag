@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y la configuración de WF-03 (panorámica, AI Agent, herramientas, notas, validación, registro, aviso y configuración RAG). También el canvas de WF-04, con limitaciones de legibilidad. Incorporada la ejecución exitosa CON-205 (decisión RESPONDER y trazabilidad RAG). También su registro en Google Sheets (fila CON-205). Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** 39 capturas del canvas de los cuatro workflows (el de WF-04 con limitaciones de legibilidad), de la ejecución exitosa CON-205 con su trazabilidad RAG y de su registro en Google Sheets. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -631,12 +631,13 @@ capturas/
 | Al menos dos fuentes de entrada | Chat Trigger y Webhook (WF-02); Google Sheets y Supabase como fuentes de datos; Form Trigger para la ingesta |
 | Lógica de control con criterio | Validación previa, control de acceso, validación de la decisión, prevención de duplicados (sección 3); Sticky Notes en los cuatro workflows |
 | AI Agent que toma decisiones, con system prompt completo | Secciones 4 y 7 |
+| Por qué un AI Agent con RAG y no un nodo de IA simple o una consulta estática | Sección 4 |
 | Decisión de modelo local frente a nube | Sección 5 |
-| Canal de salida usable | Respuesta en chat o webhook, fila en Consultas, aviso por Gmail |
-| Manejo de errores y casos límite | Sección 8 |
+| Canal de salida usable | Respuesta en chat o webhook, fila en Consultas, aviso por Gmail (envío real probado; deshabilitado en la entrega) |
+| Manejo de errores y casos límite (al menos dos puntos de falla) | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Incorporadas; pendiente de la auditoría final de evidencias.** Canvas de los cuatro workflows incorporados ([sección 2](#capturas-del-canvas)); en WF-04, con limitaciones de legibilidad. Ejecución exitosa CON-205 incorporada ([sección 9](#evidencia-de-la-ejecución-exitosa-con-205)); registro en Google Sheets incorporado. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | Canvas de los cuatro workflows ([sección 2](#capturas-del-canvas)); en WF-04, con limitaciones de legibilidad. Ejecución exitosa CON-205 con trazabilidad RAG y registro en Google Sheets ([sección 9](#evidencia-de-la-ejecución-exitosa-con-205)). Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 
