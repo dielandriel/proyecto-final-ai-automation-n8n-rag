@@ -14,8 +14,8 @@ Capturas auténticas de las interfaces de n8n, Supabase y Google Sheets.
 | `02_WF-02_canvas.png` | WF-02 | Canvas completo: chat y webhook, validación previa, respuesta y monitoreo | — | 1162 × 519 | Aprobada en conjunto con 02a–02e | Panorámica contextual: las etiquetas son pequeñas y se leen en las capturas de detalle. Identificadores de WF-03 y WF-04 ocultos |
 | `03_WF-03_canvas.png` | WF-03 | Panorámica de WF-03: seis notas, grupos de validación, AI Agent con RAG, registro y aviso, y sus conexiones | — | 1158 × 515 | Aprobada como panorámica contextual (lote 4) | Solo muestra la estructura general: los nombres de nodos no son legibles a este tamaño y se leen en los detalles publicados (`03a`, `03b1`, `03b2`, `03c1`, `03c2`, `03d`, `03d1`, `03d2`, `03n1` a `03n6`). En el borde inferior derecho se ve un ícono flotante del escritorio ajeno a n8n |
 | `04_WF-04_canvas.png` | WF-04 | Canvas completo del monitoreo de errores: cuatro Sticky Notes, dos entradas y recorrido hasta el resultado | — | 1160 × 533 | Aprobada como panorámica contextual, en conjunto con 04a, 04b1 y 04b2 (lote 1) | Las cuatro notas se ven, pero su texto **no es legible** a esta escala. Los nombres de nodos se leen en los detalles |
-| `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución exitosa con el AI Agent | Prueba 14 A | — | Pendiente | — |
-| `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | Pendiente | — |
+| `05_ejecucion_CON-205_canvas.png` | WF-03 | Ejecución histórica 206 de WF-03 en la vista Executions: Succeeded en 8,863 s, 16/11 19:33:32, recorrido del canvas | Prueba 14 A | 1163 × 532 | Aprobada (lote CON-205 1) | La imagen muestra el número de ejecución, no el id de consulta: el vínculo con CON-205 lo acreditan `05a` y el registro de pruebas. Los nombres de nodos no son legibles a esta escala |
+| `06_sheets_consultas_CON-205.png` | Google Sheets | Registro de CON-205 en Consultas | Prueba 14 A | — | **Pendiente** | La fila CON-205 todavía no se verificó visualmente en Google Sheets |
 
 ## A1. Detalle de WF-01
 
@@ -122,7 +122,9 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
 | `03e_WF-03_rag_buscar_procedimientos.png` | WF-03 / Supabase | Configuración del Vector Store como herramienta | — | — | Cubierta por `03e1` y `03e2` (lote 5) | No se generará un archivo con este nombre |
 | `03e1_WF-03_rag_operacion_y_tabla.png` | WF-03 / Supabase | Panel Parameters de `buscar_procedimientos`: modo "Retrieve Documents (As Tool for AI Agent)", credencial referenciada, descripción de la herramienta y tabla `documents` | — | 1084 × 509 | Aprobada en conjunto con 03e2 (lote 5) | La credencial figura con su nombre en la instancia ("Supabase account"); el JSON entregado usa el nombre genérico "Supabase API". No se muestra ningún secreto |
 | `03e2_WF-03_rag_parametros_busqueda.png` | WF-03 / Supabase | Tabla `documents`, Limit 5, Include Metadata activo, Rerank Results desactivado y Query Name `match_documents` | — | 1079 × 488 | Aprobada en conjunto con 03e1 (lote 5) | Documenta configuración, no una ejecución RAG |
-| `05a_ejecucion_CON-205_validar_decision.png` | WF-03 | Decisión RESPONDER, respuesta con citas, fuentes y fragmentos recuperados | Prueba 14 A | — | Pendiente | Puede dividirse en `05a` y `05b` |
+| `05a_ejecucion_CON-205_validar_decision.png` | WF-03 | Nodo "Validar decisión" de la ejecución 206: salida del agente y del nodo con `id_consulta` CON-205, origen CHAT, decisión RESPONDER, PRO-RH-001, categoría Informativa, urgencia Normal y la respuesta con citas | Prueba 14 A | 1339 × 561 | Aprobada (lote CON-205 1) | Se ve el aviso de migración a n8n 3.0 de la interfaz, sin datos. LEG-0007 es un legajo ficticio |
+| `05b1_ejecucion_CON-205_rag_control.png` | WF-03 | Continuación de la salida JSON de "Validar decisión": fuentes `PRO-RH-001 §7; PRO-RH-001 §13`, estado COMPLETADO, sin código de error ni advertencias, `control.rag.usado` = true y `cantidad_busquedas` = 1 | Prueba 14 A | 1317 × 494 | Aprobada en conjunto con 05b2 (lote CON-205 1) | Parte del mismo JSON guardado |
+| `05b2_ejecucion_CON-205_rag_fragmentos.png` | WF-03 | Trazabilidad RAG: la consulta enviada a `buscar_procedimientos` y los cinco fragmentos recuperados, todos de PRO-RH-001 (§7, §13, §4, §6 y §0) | Prueba 14 A | 1326 × 480 | Aprobada en conjunto con 05b1 (lote CON-205 1) | Las secciones citadas en la respuesta (§7 y §13) están entre los fragmentos recuperados |
 
 **Revisión del lote 2 de WF-03 (`03a`, `03c1`, `03c2`):**
 
@@ -168,6 +170,20 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
   - El nombre visible de la credencial no revela el secreto.
 - **Alcance:** documentan la configuración, no una ejecución RAG exitosa, que sigue pendiente como evidencia independiente (CON-205).
 
+**Revisión del lote 1 de la ejecución CON-205 (`05`, `05a`, `05b1`, `05b2`):**
+
+- **Integridad:** PNG válidos, sin errores de CRC; dimensiones y huellas SHA-256 idénticas a las del manifiesto de origen. Ninguna coincide con imágenes ya publicadas.
+- **Metadatos:** sin bloques de texto ni EXIF.
+- **Ediciones:** ninguna.
+- **Correspondencia con `docs/REGISTRO_PRUEBAS_PASO_17.md`** (Prueba 14 A):
+  - Ejecución 205 de WF-02 → ejecución 206 de WF-03 → CON-205.
+  - Decisión RESPONDER, PRO-RH-001, categoría Informativa.
+  - El texto de la respuesta coincide con el del registro.
+- **Evidencia RAG:** una búsqueda (`cantidad_busquedas` = 1) y cinco fragmentos recuperados, todos de PRO-RH-001.
+- **Alcance:** las imágenes muestran la salida guardada de una ejecución histórica; no se ejecutó ninguna prueba nueva. No se abrieron los nodos del aviso de esa ejecución.
+- **Privacidad:** sin URL de la instancia, correos, destinatarios, tokens ni credenciales. Los datos visibles (legajo y consulta) son ficticios.
+- **Resolución:** de 1163 × 532 a 1339 × 561; el contenido relevante se lee en `05a`, `05b1` y `05b2`.
+
 ## C. Complementarias
 
 | Archivo | Workflow o sistema | Qué demuestra | Prueba | Resolución original | Estado | Observaciones |
@@ -179,13 +195,14 @@ Complementan la panorámica `04_WF-04_canvas.png`; se aprueban en conjunto con e
 
 - **WF-01:** 6 capturas aprobadas (panorámica `01` y detalles `01a` a `01e`).
 - **WF-02:** 6 capturas aprobadas (panorámica `02` y detalles `02a` a `02e`).
-- **WF-03:** 17 capturas aprobadas. La documentación visual de la configuración está completa; la ejecución exitosa sigue pendiente.
+- **WF-03:** 17 capturas aprobadas. La documentación visual de la configuración está completa.
+- **Ejecución exitosa CON-205:** 4 capturas aprobadas (`05`, `05a`, `05b1`, `05b2`): ejecución 206 exitosa, decisión RESPONDER y trazabilidad RAG.
   - Lote 1: agente, herramientas y seis notas.
   - Lote 2: validación `03a` y registro `03c1` y `03c2`.
   - Lote 3: aviso de derivación, con la panorámica `03d` y los detalles `03d1` y `03d2`.
   - Lote 4: panorámica contextual `03`.
   - Lote 5: configuración RAG `03e1` y `03e2`.
-- **Pendiente de WF-03:** evidencias de la ejecución exitosa CON-205 (`05`, `05a`) y su registro en Sheets (`06`).
+- **Pendiente:** fila CON-205 en Google Sheets (`06`), aún no verificada visualmente.
 - **WF-04:** 4 capturas aprobadas en conjunto (panorámica `04` y detalles `04a`, `04b1` y `04b2`), con las limitaciones de legibilidad indicadas en la sección A4.
 - **Otras pendientes:** complementarias (`07`, `08`). Opcionales: capturas legibles de las notas de WF-04 y una toma completa de Evitar duplicados.
 - No se incluyen imágenes ampliadas ni reconstruidas para completar el inventario.

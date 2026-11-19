@@ -6,7 +6,7 @@
 - **Empresa del caso:** Cordal Tecnología S.A. (empresa ficticia; todos los datos son ficticios)
 - **Plataforma:** n8n Cloud (noviembre de 2026)
 - **Estado:** prototipo académico implementado y probado. Los workflows se entregan sin publicar, con Gmail deshabilitado.
-- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y la configuración de WF-03 (panorámica, AI Agent, herramientas, notas, validación, registro, aviso y configuración RAG). También el canvas de WF-04, con limitaciones de legibilidad. Están pendientes la ejecución exitosa CON-205 y su registro en Google Sheets. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
+- **Evidencias visuales:** incorporadas las capturas de WF-01 y WF-02 y la configuración de WF-03 (panorámica, AI Agent, herramientas, notas, validación, registro, aviso y configuración RAG). También el canvas de WF-04, con limitaciones de legibilidad. Incorporada la ejecución exitosa CON-205 (decisión RESPONDER y trazabilidad RAG). Está pendiente la captura de su fila en Google Sheets. Estado de cada captura: [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md).
 
 ## Contenido
 
@@ -119,7 +119,7 @@ Detalles:
 - [Nota "Procesamiento"](capturas/02b_WF-02_nota_procesamiento.png)
 - [Nota "Respuesta y monitoreo"](capturas/02c_WF-02_nota_respuesta_monitoreo.png)
 
-**WF-03 Procesamiento.** Configuración documentada: panorámica, AI Agent con sus herramientas, seis notas explicativas, validación del empleado, registro en Consultas, aviso de derivación y configuración RAG. La ejecución exitosa (CON-205) se documentará por separado y está pendiente.
+**WF-03 Procesamiento.** Configuración documentada: panorámica, AI Agent con sus herramientas, seis notas explicativas, validación del empleado, registro en Consultas, aviso de derivación y configuración RAG. La ejecución exitosa (CON-205) se documenta en la [sección 9](#evidencia-de-la-ejecución-exitosa-con-205).
 
 La panorámica es contextual: muestra las notas, los cuatro grupos y sus conexiones, pero los nombres de los nodos se leen en las capturas de detalle de esta sección.
 
@@ -170,7 +170,7 @@ Detalles:
 - [Deduplicación y preparación de la alerta](capturas/04b1_WF-04_deduplicacion_preparacion.png) (el nodo Evitar duplicados aparece recortado en el borde izquierdo)
 - [Envío de la alerta y resultado del monitoreo](capturas/04b2_WF-04_envio_resultado.png)
 
-Están pendientes las capturas de una ejecución exitosa ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
+La ejecución exitosa CON-205 se documenta en la [sección 9](#evidencia-de-la-ejecución-exitosa-con-205); la captura de su fila en Google Sheets está pendiente ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
 
 ### Herramientas utilizadas
 
@@ -504,6 +504,19 @@ Ejemplo real (Prueba 14, consulta A por chat):
 - **Respuesta:** "Según PRO-RH-001, sección 7 y sección 13, para un período de 5 o más días hábiles tenés que cargar la solicitud con al menos 15 días corridos de anticipación a la fecha de inicio. Primero la aprueba el jefe directo y después Recursos Humanos valida el saldo."
 - **Registro:** fila CON-205 en Consultas.
 
+### Evidencia de la ejecución exitosa CON-205
+
+Capturas de la ejecución histórica 206 de WF-03, originada por la ejecución 205 de WF-02 (Prueba 14 A). Muestran la salida guardada; no corresponden a una prueba nueva.
+
+![Nodo Validar decisión de la ejecución 206: CON-205 con decisión RESPONDER](capturas/05a_ejecucion_CON-205_validar_decision.png)
+
+- [Ejecución 206 de WF-03: estado Succeeded](capturas/05_ejecucion_CON-205_canvas.png)
+- [Decisión RESPONDER, PRO-RH-001 y respuesta con citas](capturas/05a_ejecucion_CON-205_validar_decision.png)
+- [Fuentes, estado COMPLETADO y control RAG (una búsqueda)](capturas/05b1_ejecucion_CON-205_rag_control.png)
+- [Trazabilidad RAG: consulta y cinco fragmentos recuperados de PRO-RH-001](capturas/05b2_ejecucion_CON-205_rag_fragmentos.png)
+
+La evidencia muestra una búsqueda RAG y cinco fragmentos recuperados, todos de PRO-RH-001 (secciones 7, 13, 4, 6 y 0). Las secciones citadas en la respuesta, 7 y 13, están entre ellos. La captura de la fila CON-205 en Google Sheets está **pendiente** ([índice de evidencias](capturas/INDICE_EVIDENCIAS.md)).
+
 ## 10. ROI estimado
 
 Todos los valores de entrada son **supuestos**, no mediciones. En particular, el porcentaje de consultas resueltas sin intervención humana (60 %) **no fue medido**: las pruebas usaron casos elegidos para cubrir escenarios, no una muestra representativa.
@@ -600,6 +613,7 @@ capturas/
   02*_WF-02_*.png        Canvas de WF-02 (panorámica y 5 detalles)
   03*_WF-03_*.png        WF-03: panorámica, agente, herramientas, 6 notas, validación, registro, aviso y RAG
   04*_WF-04_*.png        Canvas de WF-04 (panorámica y 3 detalles)
+  05*_ejecucion_CON-205_*.png   Ejecución exitosa CON-205 (4 capturas)
 ```
 
 ## 14. Correspondencia con la consigna
@@ -615,7 +629,7 @@ capturas/
 | Manejo de errores y casos límite | Sección 8 |
 | RAG con Vector Store y embeddings | Sección 6 |
 | Workflow exportado en JSON | [`workflows/`](workflows) |
-| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de los cuatro workflows incorporados ([sección 2](#capturas-del-canvas)); en WF-04, con limitaciones de legibilidad. Ejecución exitosa pendiente. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
+| Capturas del canvas y de una ejecución exitosa | **Parcial.** Canvas de los cuatro workflows incorporados ([sección 2](#capturas-del-canvas)); en WF-04, con limitaciones de legibilidad. Ejecución exitosa CON-205 incorporada ([sección 9](#evidencia-de-la-ejecución-exitosa-con-205)); captura de su fila en Google Sheets pendiente. Estado en [`capturas/INDICE_EVIDENCIAS.md`](capturas/INDICE_EVIDENCIAS.md) |
 
 ## 15. Limitaciones y tareas pendientes para producción
 
